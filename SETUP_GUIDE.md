@@ -1,96 +1,185 @@
-# PI_ads_maua - Sistema de Jogo Tabuleiro
+# Guia de Configuração - Jogo de Tabuleiro Mauá
 
-Um sistema interativo de jogo de tabuleiro com perguntas e desafios, com gerenciamento de usuários e pontuação.
+## Pré-requisitos
 
-## 📋 Requisitos
+Certifique-se de ter instalado:
 
-- Python 3.7+
-- MySQL 5.7+ ou MariaDB
-- pip (gerenciador de pacotes Python)
+1. **Java Development Kit (JDK)**
+   - Versão 8 ou superior
+   - Baixar: https://www.oracle.com/java/technologies/javase-downloads.html
+   - Verificar instalação: `java -version`
 
-## 🚀 Instalação e Configuração
+2. **MySQL Server**
+   - Versão 5.7 ou superior
+   - Baixar: https://www.mysql.com/downloads/mysql/
+   - Certifique-se de que o serviço está rodando
 
-### 1. Instalar dependências Python
-```bash
-pip install -r requirements.txt
-```
+3. **NetBeans IDE** (Recomendado)
+   - Baixar: https://netbeans.apache.org/
+   - Ou use outra IDE Java de sua preferência
 
-### 2. Configurar o Banco de Dados
+## Passo 1: Criar o Banco de Dados
 
-Edite o arquivo `jogo/config.py` e altere as credenciais do MySQL:
-```python
-DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'seu_usuario',      # Mude aqui
-    'password': 'sua_senha',    # Mude aqui
-    'database': 'jogo_tabuleiro',
-    'port': 3306
-}
-```
+### Via MySQL Workbench
 
-### 3. Criar o Banco de Dados
-Execute o script de setup:
-```bash
-python setup_db.py
-```
+1. Abra MySQL Workbench
+2. Conecte ao servidor local
+3. Vá para File > Open SQL Script
+4. Selecione `db/database.sql`
+5. Clique em Execute (⚡)
 
-### 4. Inserir Dados Iniciais
-Execute o script de seed:
-```bash
-python seed_db.py
-```
-
-## 🎮 Como Executar
+### Via Linha de Comando
 
 ```bash
-cd jogo
-python main.py
+# Abrir MySQL
+mysql -u root -p
+
+# Digitar a senha quando solicitado
+# Cole todo o conteúdo de db/database.sql
+# Ou execute:
+source C:\Users\seu_usuario\Documents\PI_ads_maua\db\database.sql;
+
+# Verificar se o banco foi criado
+SHOW DATABASES;
+USE jogo_maua;
+SHOW TABLES;
 ```
 
-## 📁 Estrutura do Projeto
+## Passo 2: Configurar Credenciais do Banco
+
+Edite o arquivo `src/com/maua/jogo/util/ConexaoBD.java`:
+
+```java
+// Linha 9-12
+private static final String URL = "jdbc:mysql://localhost:3306/jogo_maua";
+private static final String USUARIO = "root";    // Mude se necessário
+private static final String SENHA = "root";      // Mude se necessário
+```
+
+**Exemplos:**
+- Se sua senha MySQL é vazia: `private static final String SENHA = "";`
+- Se usar usuário diferente: `private static final String USUARIO = "seu_usuario";`
+
+## Passo 3: Configurar o NetBeans
+
+1. **Abrir o Projeto**
+   - File > Open Project
+   - Selecione a pasta `PI_ads_maua`
+
+2. **Adicionar Driver MySQL** (se necessário)
+   - Tools > Libraries
+   - New Library > "MySQL"
+   - Add JAR/Folder
+   - Selecione `mysql-connector-java-*.jar`
+
+3. **Compilar Projeto**
+   - Run > Clean and Build Project
+
+4. **Executar**
+   - Right-click em `Main.java` > Run File
+   - Ou pressione F6
+
+## Passo 4: Primeira Execução
+
+Na primeira execução, você verá:
+
+```
+Conexão com banco de dados estabelecida com sucesso!
+```
+
+Se não aparecer essa mensagem, verifique:
+
+- ✅ MySQL está rodando?
+- ✅ Banco `jogo_maua` foi criado?
+- ✅ Credenciais estão corretas em `ConexaoBD.java`?
+
+## Dados de Teste
+
+Um jogador de teste foi criado:
+- **Email:** teste@email.com
+- **Senha:** senha123
+
+## Possíveis Problemas e Soluções
+
+### Problema: "ClassNotFoundException: com.mysql.cj.jdbc.Driver"
+
+**Solução:**
+1. Adicione o driver MySQL ao classpath do projeto
+2. Em NetBeans: Right-click Projeto > Properties > Libraries
+3. Clique em "Add JAR"
+4. Selecione `mysql-connector-java-*.jar`
+
+### Problema: "Access denied for user 'root'@'localhost'"
+
+**Solução:**
+1. Verifique se a senha em `ConexaoBD.java` está correta
+2. Teste a conexão manual: `mysql -u root -p` no terminal
+
+### Problema: "Unknown database 'jogo_maua'"
+
+**Solução:**
+1. Execute o script SQL novamente
+2. Verifique se não há erros na criação
+3. Confirme com: `USE jogo_maua; SHOW TABLES;`
+
+### Problema: "Can't connect to MySQL server on 'localhost:3306'"
+
+**Solução:**
+1. Verifique se MySQL está rodando (Services ou terminal)
+2. Windows: Abra "Services" e procure por "MySQL"
+3. macOS: `brew services list` para verificar MySQL
+4. Linux: `sudo systemctl status mysql`
+
+### Problema: A tela não aparece
+
+**Solução:**
+1. Verifique o console para mensagens de erro
+2. Certifique-se de que o JDK está instalado corretamente
+3. Tente em outra IDE Java
+
+## Compilação Manual (Sem IDE)
+
+Se preferir compilar sem usar a IDE:
+
+```bash
+# Navegue até a pasta do projeto
+cd C:\Users\seu_usuario\Documents\PI_ads_maua
+
+# Compile todos os arquivos
+javac -d bin -cp . src/com/maua/jogo/**/*.java
+
+# Execute
+java -cp bin com.maua.jogo.Main
+```
+
+## Estrutura de Pastas Esperada
 
 ```
 PI_ads_maua/
-├── README.md
-├── requirements.txt
-├── setup_db.py          # Script para criar banco de dados
-├── seed_db.py           # Script para inserir dados iniciais
+├── src/
+│   └── com/maua/jogo/
+│       ├── Main.java
+│       ├── model/
+│       ├── view/
+│       ├── controller/
+│       └── util/
 ├── db/
-│   └── db.sql          # Schema do banco de dados
-└── jogo/
-    ├── config.py       # Configurações do banco
-    ├── banco.py        # Classe de conexão com banco
-    ├── jogador.py      # Classe do jogador
-    ├── partida.py      # Classe de partida
-    ├── tabuleiro.py    # Classe do tabuleiro
-    ├── desafio.py      # Classe de desafios
-    └── main.py         # Ponto de entrada do jogo
+│   └── database.sql
+└── README.md
 ```
 
-## 🗄️ Banco de Dados
+## Próximos Passos
 
-O sistema utiliza MySQL com as seguintes tabelas principais:
+1. ✅ Configuração completa
+2. ✅ Execute `Main.java`
+3. ✅ Crie uma conta
+4. ✅ Comece a jogar!
 
-- **usuarios**: Registro de jogadores
-- **fases**: Níveis do jogo
-- **partidas**: Histórico de partidas
-- **perguntas**: Banco de perguntas
-- **respostas**: Respostas dos jogadores
-- **pontuacoes**: Pontuação das partidas
-- **ranking**: View com ranking dos jogadores
+## Suporte
 
-## 🐛 Troubleshooting
+Para problemas adicionais:
+1. Verifique o console de erros (F8 no NetBeans)
+2. Consulte a documentação do MySQL
+3. Revise o README.md
 
-**Erro: "Erro ao conectar ao MySQL"**
-- Verifique se o MySQL está rodando
-- Confira as credenciais em `jogo/config.py`
-
-**Erro: "Banco de dados não existe"**
-- Execute `python setup_db.py` primeiro
-
-**Erro: "Não há dados"**
-- Execute `python seed_db.py` para inserir dados iniciais
-
-## 👤 Autor
-
-Projeto Integrador - Disciplina de ADS - MAUA
+**Bom jogo! 🎮**
