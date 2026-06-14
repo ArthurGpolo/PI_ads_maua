@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="JornadaDoConhecimento-impl" basedir="..">
+    <!-- Este é um arquivo gerado pelo NetBeans. Simplificando para o usuário. -->
+    <target name="default" depends="compile,jar"/>
+    
+    <target name="init">
+        <mkdir dir="build/classes"/>
+        <mkdir dir="dist"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <javac srcdir="src" destdir="build/classes" classpath="lib/mysql-connector-j.jar" includeantruntime="false"/>
+    </target>
+
+    <target name="jar" depends="compile">
+        <jar destfile="dist/JornadaDoConhecimento.jar" basedir="build/classes">
+            <manifest>
+                <attribute name="Main-Class" value="com.maua.jogo.Main"/>
+                <attribute name="Class-Path" value="lib/mysql-connector-j.jar"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run" depends="compile">
+        <java classname="com.maua.jogo.Main" fork="true">
+            <classpath>
+                <pathelement location="build/classes"/>
+                <pathelement location="lib/mysql-connector-j.jar"/>
+            </classpath>
+        </java>
+    </target>
+</project>
