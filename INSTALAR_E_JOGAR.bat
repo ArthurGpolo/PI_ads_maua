@@ -18,7 +18,7 @@ echo [2/3] Compilando o projeto...
 if exist "bin" rd /s /q bin
 mkdir bin
 dir /s /b src\*.java > sources.txt
-javac -d bin -cp "lib\mysql-connector-j.jar" @sources.txt
+javac -encoding UTF-8 -d bin -cp "lib\mysql-connector-j.jar" @sources.txt
 if %errorlevel% neq 0 (
     echo [ERRO] Falha na compilacao. Verifique se o JDK esta instalado.
     pause

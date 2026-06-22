@@ -1,1 +1,5 @@
 /dist/
+/bin/
+/bin-test/
+sources.txt
+sources-test.txt

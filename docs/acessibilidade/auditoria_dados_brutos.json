@@ -1,0 +1,961 @@
+{
+  "achados": [
+    {
+      "dimensao": "CRITERIO 1 - CORES E CONTRASTE",
+      "resumo": "Avaliacao de cores e contraste das 4 telas Swing (Nimbus L&F, Main.java:17). O codigo usa java.awt.Color em poucos pontos: 2 botoes coloridos (azul login, verde dado), 2 fundos de painel claros (status, pergunta) e 6 fundos pastel de fase + bordas (DARK_GRAY/RED). Quanto ao CONTRASTE TEXTO/FUNDO puro, o app esta majoritariamente bem: todos os textos pretos sobre fundos claros/pastel ficam entre 14.9:1 e 20.6:1 (muito acima de 4.5:1) e o botao azul de login passa com 5.54:1. Ha 1 ponto PARCIAL real de contraste: o botao verde \"LANCAR DADO\" (branco sobre RGB(50,150,50)) = 3.79:1, que passa como texto grande (>=18pt bold, limite 3:1) mas FALHA o criterio de texto normal 4.5:1. Os DOIS problemas mais graves desta dimensao nao sao de razao de contraste e sim de COR-COMO-UNICO-MEIO (WCAG 1.4.1): (1) as 6 fases sao codificadas SOMENTE pela cor de fundo, com luminancias quase identicas (contraste entre pares de fundo ate 1.02:1) - para daltonicos e visao monocromatica as fases ficam indistinguiveis; (2) a posicao atual do jogador e marcada APENAS por borda VERMELHA 4px (TelaTabuleiro.java:162), sinal vermelho/verde problematico para o daltonismo mais comum. Nao existe modo de alto contraste nem alternativa nao-cromatica (icone, rotulo, padrao). Recomendacoes concretas: escurecer o verde do botao para >=4.5:1, adicionar rotulo/icone/sigla de fase alem da cor, e substituir/reforcar o destaque de posicao por um marcador nao-cromatico (icone de peao, texto \"VOCE ESTA AQUI\", seta).",
+      "constatacoes": [
+        {
+          "id": "C1-01",
+          "titulo": "Botao verde LANCAR DADO falha contraste de texto normal (3.79:1)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "80-83",
+          "criterio": "WCAG 1.4.3 Contraste minimo (4.5:1 texto normal / 3:1 texto grande) - Criterio 1 da atividade",
+          "classificacao": "Parcial",
+          "severidade": "Media",
+          "evidencia": "btnDado.setBackground(new Color(50, 150, 50)); btnDado.setForeground(Color.WHITE); btnDado.setFont(new Font(\"Arial\", Font.BOLD, 18)); -> branco sobre verde (50,150,50) = 3.79:1. Como a fonte e Arial BOLD 18 (>=18pt bold = 'texto grande'), passa o limite de 3:1, mas FALHA o limite de 4.5:1 exigido para texto normal. E o botao de acao principal do jogo.",
+          "impacto": "No limite. Para baixa visao e em monitores de baixo contraste/brilho o rotulo branco sobre verde fica dificil de ler. Se a fonte fosse reduzida abaixo de 18pt bold, passaria a INADEQUADO.",
+          "recomendacao": "Escurecer o verde para alcancar >=4.5:1 com branco, ex.: btnDado.setBackground(new Color(0, 110, 40)); (verde escuro ~5:1) ou (34,120,34). Alternativamente manter a fonte BOLD 18 e documentar como 'texto grande'. Garantir que setForeground continue Color.WHITE.",
+          "perfilAfetado": [
+            "baixa visao",
+            "daltonismo",
+            "ambiente de baixo contraste"
+          ]
+        },
+        {
+          "id": "C1-02",
+          "titulo": "Fases codificadas SOMENTE por cor de fundo (luminancia identica, 1.02:1 entre pares)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "115-122",
+          "criterio": "WCAG 1.4.1 Uso da cor (a cor nao pode ser o unico meio de transmitir informacao) - Criterio 1 da atividade",
+          "classificacao": "Inadequado",
+          "severidade": "Alta",
+          "evidencia": "switch(casa.getFase()){ case EXPLORADOR: setBackground(220,255,220); case CONECTOR: (220,220,255); case TRANSFORMADOR: (255,255,220); case CONHECEDOR: (255,220,255); case PLANEJADOR: (220,255,255); case REALIZADOR: (255,220,220); }. Os 6 pasteis tem luminancia quase igual: o contraste ENTRE dois fundos de fase chega a 1.02:1. A unica diferenca e o matiz (hue).",
+          "impacto": "Para daltonicos (deuteranopia/protanopia ~8% dos homens) e visao monocromatica, as 6 fases ficam visualmente INDISTINGUIVEIS - todas parecem o mesmo cinza claro. O jogador nao consegue saber a que fase a casa pertence olhando o tabuleiro. Embora o texto da fase exista no rodape da casa (lblDesc, linha 109), ele e Arial ITALIC 10 (minusculo), entao a distincao pratica depende da cor.",
+          "recomendacao": "Adicionar redundancia nao-cromatica por fase: (1) reforcar lblDesc (linha 109-110) com sigla/rotulo legivel da fase, ex. fonte >=12 nao-italico; (2) adicionar um icone ou padrao por fase via JLabel.setIcon; (3) escurecer as cores para que tambem difiram em LUMINANCIA, nao so em matiz (ex. atribuir a cada fase um tom progressivamente mais escuro distinguivel em escala de cinza). Expor a fase no AccessibleContext: pnlCasa.getAccessibleContext().setAccessibleName(\"Casa \"+pos+\", fase \"+nome).",
+          "perfilAfetado": [
+            "daltonismo (deuteranopia/protanopia)",
+            "visao monocromatica",
+            "baixa visao",
+            "cegueira/leitor de tela"
+          ]
+        },
+        {
+          "id": "C1-03",
+          "titulo": "Posicao atual marcada SO por borda vermelha 4px (sinal vermelho/verde)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "160-166",
+          "criterio": "WCAG 1.4.1 Uso da cor + 1.4.11 Contraste de elemento nao-textual (3:1) - Criterio 1 da atividade",
+          "classificacao": "Inadequado",
+          "severidade": "Alta",
+          "evidencia": "if (i == j.getPosicao()-1) casasGraficas.get(i).setBorder(BorderFactory.createLineBorder(Color.RED, 4)); else (...DARK_GRAY,1). O unico indicador de 'voce esta aqui' e a cor vermelha da borda. Contra os fundos pastel a borda vermelha da 3.15-3.69:1 (passa 1.4.11 de 3:1 no limite), mas e cor-como-unico-meio: vermelho vs cinza-escuro.",
+          "impacto": "Para daltonismo vermelho-verde (o mais comum), a borda vermelha 4px contra a borda cinza-escuro 1px pode nao ser percebida como diferenca de COR; resta apenas a diferenca de ESPESSURA (4px vs 1px), que e sutil e nao foi pensada como sinal redundante. O jogador pode perder de vista sua propria posicao no tabuleiro.",
+          "recomendacao": "Adicionar marcador nao-cromatico para a casa atual alem da cor: (1) inserir um JLabel/icone de peao ou a palavra 'AQUI' na casa atual; (2) usar borda mais grossa E de estilo diferente; (3) opcional setBackground destacado com luminancia claramente distinta. Anunciar para leitor de tela: casasGraficas.get(i).getAccessibleContext().setAccessibleDescription(\"Posicao atual do jogador\"). Manter a cor como reforco, nao como unico sinal.",
+          "perfilAfetado": [
+            "daltonismo vermelho-verde",
+            "visao monocromatica",
+            "cegueira/leitor de tela"
+          ]
+        },
+        {
+          "id": "C1-04",
+          "titulo": "Ausencia de modo de alto contraste / tema acessivel",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/Main.java",
+          "linha": "14-23",
+          "criterio": "WCAG 1.4.3/1.4.6 (contraste aprimorado) + heuristicas de jogos (Cheiran/UFRGS) - Criterio 1 da atividade",
+          "classificacao": "Inadequado",
+          "severidade": "Media",
+          "evidencia": "Main.java define apenas o L&F Nimbus (linha 15-20). Nenhuma tela oferece alternar para um tema de alto contraste (ex. fundo preto/texto branco amarelo) nem respeita preferencia de alto contraste do SO. Cores fixas via setBackground/setForeground em TelaLogin:45-46, TelaTabuleiro:39,82-83,116-121, TelaDesafio:31.",
+          "impacto": "Usuarios com baixa visao severa ou sensibilidade que precisam de contraste muito acima de 4.5:1 nao tem como aumentar. Os pasteis claros (fase) e o cinza Nimbus (214,217,223) sao confortaveis para a maioria mas nao configuraveis.",
+          "recomendacao": "Oferecer um botao/menu 'Alto Contraste' que troque UIManager defaults para um esquema escuro de alto contraste (ex. fundo (0,0,0), texto (255,255,255) ou (255,255,0)) e bordas fortes, recarregando as telas. Centralizar as cores em uma classe de tema em vez de literais espalhados, facilitando o toggle.",
+          "perfilAfetado": [
+            "baixa visao severa",
+            "sensibilidade visual"
+          ]
+        },
+        {
+          "id": "C1-05",
+          "titulo": "PAR ADEQUADO - Botao Entrar branco sobre azul (5.54:1)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaLogin.java",
+          "linha": "44-46",
+          "criterio": "WCAG 1.4.3 Contraste minimo - Criterio 1 da atividade (evidencia de conformidade)",
+          "classificacao": "Adequado",
+          "severidade": "Baixa",
+          "evidencia": "btnEntrar.setBackground(new Color(50, 100, 200)); btnEntrar.setForeground(Color.WHITE); -> branco sobre azul (50,100,200) = 5.54:1. Passa texto normal (4.5:1) e texto grande (3:1).",
+          "impacto": "Botao primario de login legivel para todos os perfis de contraste. Serve de referencia: o mesmo padrao deveria ser aplicado ao verde do btnDado (C1-01).",
+          "recomendacao": "Manter. Usar este azul como base de paleta acessivel e replicar o nivel de contraste nos demais botoes coloridos.",
+          "perfilAfetado": [
+            "todos"
+          ]
+        },
+        {
+          "id": "C1-06",
+          "titulo": "PAR ADEQUADO - Textos pretos sobre os 6 fundos pastel de fase (15.7:1 a 20.6:1)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "106-121",
+          "criterio": "WCAG 1.4.3 Contraste minimo - Criterio 1 da atividade (evidencia de conformidade)",
+          "classificacao": "Adequado",
+          "severidade": "Baixa",
+          "evidencia": "lblNum (Arial BOLD 16) e lblDesc (Arial ITALIC 10) usam cor de texto padrao (preto) sobre os fundos: EXPLORADOR(220,255,220)=19.4:1; CONECTOR(220,220,255)=15.7:1; TRANSFORMADOR(255,255,220)=20.6:1; CONHECEDOR(255,220,255)=16.9:1; PLANEJADOR(220,255,255)=19.8:1; REALIZADOR(255,220,220)=16.5:1. Todos muito acima de 4.5:1.",
+          "impacto": "O CONTRASTE do texto da casa contra seu proprio fundo e excelente. (Atencao: isto NAO resolve o problema 1.4.1 entre fundos diferentes - ver C1-02 - nem o tamanho italico 10 do lblDesc, que e problema de tipografia do Criterio 2.)",
+          "recomendacao": "Manter as cores de texto. Tratar separadamente a distincao entre fases (C1-02) e o tamanho da fonte da descricao (Criterio 2).",
+          "perfilAfetado": [
+            "todos"
+          ]
+        },
+        {
+          "id": "C1-07",
+          "titulo": "PAR ADEQUADO - Painel de status preto sobre azul-claro (18.2:1)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "39-50",
+          "criterio": "WCAG 1.4.3 Contraste minimo - Criterio 1 da atividade (evidencia de conformidade)",
+          "classificacao": "Adequado",
+          "severidade": "Baixa",
+          "evidencia": "pnlStatus.setBackground(new Color(230, 240, 250)); labels lblJogador/lblPontos/lblFase/lblPosicao com texto preto (cor padrao) Arial BOLD 14 -> preto sobre (230,240,250) = 18.2:1.",
+          "impacto": "Informacoes de status (jogador, pontos, fase, posicao) tem contraste excelente. (A fonte BOLD 14 < 16px e questao do Criterio 2, nao desta dimensao.)",
+          "recomendacao": "Manter as cores. Avaliar aumento da fonte para >=16px no Criterio 2.",
+          "perfilAfetado": [
+            "todos"
+          ]
+        },
+        {
+          "id": "C1-08",
+          "titulo": "PAR ADEQUADO - Pergunta do desafio preto sobre cinza-claro (19.3:1)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaDesafio.java",
+          "linha": "26-32",
+          "criterio": "WCAG 1.4.3 Contraste minimo - Criterio 1 da atividade (evidencia de conformidade)",
+          "classificacao": "Adequado",
+          "severidade": "Baixa",
+          "evidencia": "txtPergunta.setBackground(new Color(245, 245, 245)); fonte Arial BOLD 16, texto preto (padrao) -> preto sobre (245,245,245) = 19.3:1.",
+          "impacto": "O enunciado da pergunta tem contraste excelente e fonte adequada (BOLD 16). Bom exemplo de legibilidade.",
+          "recomendacao": "Manter. Os botoes de opcao (Arial PLAIN 14) usam fundo Nimbus padrao - contraste de texto ok, mas tamanho < 16px e questao do Criterio 2.",
+          "perfilAfetado": [
+            "todos"
+          ]
+        },
+        {
+          "id": "C1-09",
+          "titulo": "PAR ADEQUADO - Labels padrao preto sobre fundo Nimbus (14.9:1)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaCadastro.java",
+          "linha": "23-38",
+          "criterio": "WCAG 1.4.3 Contraste minimo - Criterio 1 da atividade (evidencia de conformidade)",
+          "classificacao": "Adequado",
+          "severidade": "Baixa",
+          "evidencia": "Telas usam o fundo padrao de painel Nimbus (214,217,223) com texto preto padrao (ex. JLabels 'Nome Completo:', 'E-mail:', 'Senha:' em TelaCadastro:31-35 e labels de TelaLogin:36,40) -> preto sobre Nimbus(214,217,223) = 14.9:1. Mesmo caso para o titulo lblTitulo (TelaLogin:30) e botoes sem cor definida.",
+          "impacto": "Todo texto padrao preto sobre o cinza Nimbus tem contraste muito confortavel. Nenhum problema de contraste de texto nas telas de login/cadastro.",
+          "recomendacao": "Manter as cores. As pendencias dessas telas (tamanho de fonte 12px < 16px, falta de setLabelFor/mnemonics) pertencem aos Criterios 2 e 3.",
+          "perfilAfetado": [
+            "todos"
+          ]
+        },
+        {
+          "id": "C1-10",
+          "titulo": "Bordas das casas em DARK_GRAY - contraste estrutural adequado, mas sem papel semantico",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "104",
+          "criterio": "WCAG 1.4.11 Contraste de elemento nao-textual (3:1) - Criterio 1 da atividade",
+          "classificacao": "Adequado",
+          "severidade": "Baixa",
+          "evidencia": "pnlCasa.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY)); cinza-escuro (~64,64,64) contra os fundos pastel claros oferece contraste de componente bem acima de 3:1, delimitando visualmente cada casa.",
+          "impacto": "A separacao entre casas e perceptivel para todos. Serve de referencia para reforcar o destaque de posicao (C1-03) com diferenca de espessura/estilo, nao so de cor.",
+          "recomendacao": "Manter a borda padrao DARK_GRAY. Diferenciar a casa atual por espessura + icone (ver C1-03), nao apenas trocando a cor para vermelho.",
+          "perfilAfetado": [
+            "todos"
+          ]
+        }
+      ]
+    },
+    {
+      "dimensao": "Criterio 2 - Tipografia e Legibilidade",
+      "resumo": "Avaliacao de tipografia das 5 telas (TelaLogin, TelaCadastro, TelaTabuleiro, TelaDesafio, Main) contra o Criterio 2 (fonte >=16px, hierarquia, italico/legibilidade, blocos de texto, espacamento, ausencia de zoom). Resultado geral: PARCIAL/INADEQUADO. Apenas 3 fontes atingem o minimo de 16px: titulo do login (Arial BOLD 20), numero da casa (Arial BOLD 16), botao LANCAR DADO (Arial BOLD 18) e pergunta do desafio (Arial BOLD 16). TODO o restante fica abaixo de 16px: rotulos/campos/botoes do login e do cadastro herdam a fonte padrao Nimbus (~12px) porque Main.java define Nimbus mas NUNCA sobrescreve os defaults de fonte (sem UIManager.put). A TelaCadastro nao tem NENHUM setFont nem qualquer hierarquia de titulo. Pontos mais graves: descricao da casa em Arial ITALIC 10 (10px + italico = pior legibilidade do sistema, perfil baixa visao/dislexia/cognitivo), status em 14px e botoes de opcao do desafio em 14px. Nenhuma tela oferece zoom/ajuste de fonte e o login esta com setResizable(false), impedindo ampliacao. O log (JTextArea Monospaced 12) e a pergunta (JTextArea) usam espacamento de linha padrao do componente, sem entrelinha aumentada. Correcao central recomendada: definir defaults de fonte do Nimbus em Main.java (ex.: UIManager.getLookAndFeelDefaults().put(\"defaultFont\", new Font(\"Arial\", Font.PLAIN, 16)) ou setar chaves Label.font/Button.font/TextField.font/TextArea.font) elevando a base para >=16px, alem de corrigir pontualmente a descricao da casa (PLAIN 14-16, sem italico), status (>=16), botoes de opcao (>=16) e adicionar controle de zoom de fonte. Contrastes ja foram dados como chao-de-verdade e nao sao recalculados aqui.",
+      "constatacoes": [
+        {
+          "id": "TIP-01",
+          "titulo": "Main.java define Nimbus mas nao sobrescreve os defaults de fonte (~12px herdado por todo o app)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/Main.java",
+          "linha": "14-20",
+          "classificacao": "Inadequado",
+          "criterio": "Criterio 2 - fonte base >=16px (causa-raiz)",
+          "evidencia": "O loop seta o Look&Feel Nimbus (UIManager.setLookAndFeel) mas nao ha NENHUM UIManager.put / getLookAndFeelDefaults().put para fonte. Consequencia: todo componente sem setFont explicito (labels e campos do login, TODA a TelaCadastro, btnRanking, btnSair, btnEntrar, btnCadastrar) renderiza com a fonte padrao do Nimbus, de aproximadamente 12px, abaixo do minimo de 16px exigido pela atividade.",
+          "impacto": "A maior parte do texto da aplicacao fica abaixo de 16px sem que cada tela precise estar errada individualmente: o problema e centralizado e afeta baixa visao, idosos, dislexia e uso a distancia da tela. Corrigir aqui resolve a base de varias telas de uma vez.",
+          "recomendacao": "Logo apos setar o Nimbus em Main.main, definir os defaults de fonte: UIManager.getLookAndFeelDefaults().put(\"defaultFont\", new Font(\"Arial\", Font.PLAIN, 16)); e/ou, de forma granular, percorrer as chaves e aplicar: Font base = new Font(\"Arial\", Font.PLAIN, 16); UIManager.put(\"Label.font\", base); UIManager.put(\"Button.font\", base); UIManager.put(\"TextField.font\", base); UIManager.put(\"PasswordField.font\", base); UIManager.put(\"TextArea.font\", base); UIManager.put(\"TitledBorder.font\", new Font(\"Arial\", Font.BOLD, 16)). Fazer isso ANTES de instanciar TelaLogin (que ja ocorre em invokeLater, ok).",
+          "severidade": "Alta",
+          "perfilAfetado": [
+            "visual (baixa visao)",
+            "cognitivo (dislexia)",
+            "idosos"
+          ]
+        },
+        {
+          "id": "TIP-02",
+          "titulo": "Descricao da casa em Arial ITALIC 10 - menor e menos legivel fonte do sistema",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "110",
+          "classificacao": "Inadequado",
+          "criterio": "Criterio 2 - tamanho >=16px + legibilidade (evitar italico)",
+          "evidencia": "lblDesc.setFont(new Font(\"Arial\", Font.ITALIC, 10)); — o nome da fase em cada uma das 30 casas usa 10px E italico. 10px e 6px abaixo do minimo de 16px, e o italico degrada ainda mais a legibilidade (formas inclinadas, pior reconhecimento de caractere para baixa visao e dislexia). Por ser texto que identifica a fase, e informacao funcional, nao decorativa.",
+          "impacto": "Texto efetivamente ilegivel para baixa visao; italico agrava para dislexia. Como a cor das fases ja e indistinguivel para daltonicos (WCAG 1.4.1, fora desta dimensao), o rotulo textual seria a alternativa de identificacao da fase — mas esta rotulo e justamente o mais ilegivel da tela.",
+          "recomendacao": "Trocar por fonte reta e maior: lblDesc.setFont(new Font(\"Arial\", Font.PLAIN, 14)); (ou 16 se couber no GridLayout 6x5; se nao couber, aumentar a altura util da casa ou abreviar). Remover Font.ITALIC. Como a casa e pequena, considerar tooltip com o nome completo (lblDesc.setToolTipText(casa.getFase().getNome())) e/ou getAccessibleContext().setAccessibleName para o leitor de tela.",
+          "severidade": "Alta",
+          "perfilAfetado": [
+            "visual (baixa visao)",
+            "cognitivo (dislexia)",
+            "visual (daltonismo, pois o rotulo e a alternativa a cor)"
+          ]
+        },
+        {
+          "id": "TIP-03",
+          "titulo": "TelaCadastro inteira em fonte padrao (~12px) e sem qualquer hierarquia de titulo",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaCadastro.java",
+          "linha": "23-38",
+          "classificacao": "Inadequado",
+          "criterio": "Criterio 2 - tamanho >=16px + hierarquia (titulo/subtitulo)",
+          "evidencia": "Nenhuma chamada setFont em todo o arquivo. Labels 'Nome Completo:'/'E-mail:'/'Senha:' (linhas 31,33,35), campos txtNome/txtEmail/txtSenha (26-28) e botao 'Cadastrar' (29) herdam a fonte Nimbus ~12px. Ao contrario da TelaLogin, NAO ha sequer um JLabel de titulo destacado — a tela de cadastro nao tem hierarquia visual nenhuma; o GridLayout(8,1) so empilha rotulos pequenos.",
+          "impacto": "Tela de entrada de dados (cadastro) com texto pequeno e sem ancora visual; dificulta leitura de rotulos e identificacao do que e a tela para baixa visao e cognitivo. Inconsistente com o login, que ao menos tem titulo grande.",
+          "recomendacao": "Adicionar JLabel titulo 'Criar Nova Conta' com new Font(\"Arial\", Font.BOLD, 20) no topo (subir GridLayout para 9 linhas ou usar BorderLayout.NORTH). Aplicar fonte >=16 a labels/campos/botao (resolvido em massa por TIP-01; caso nao se altere Main, setar Font campos = new Font(\"Arial\", Font.PLAIN, 16) em cada). Usar setLabelFor nos labels para vincular ao campo e melhorar leitor de tela.",
+          "severidade": "Alta",
+          "perfilAfetado": [
+            "visual (baixa visao)",
+            "cognitivo (clareza/orientacao)"
+          ]
+        },
+        {
+          "id": "TIP-04",
+          "titulo": "Rotulos e campos da TelaLogin abaixo de 16px (so o titulo passa)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaLogin.java",
+          "linha": "36-52",
+          "classificacao": "Parcial",
+          "criterio": "Criterio 2 - tamanho >=16px + hierarquia",
+          "evidencia": "lblTitulo tem Arial BOLD 20 (linha 31), boa hierarquia de titulo. Porem 'E-mail:' (36), 'Senha:' (40), txtEmail (37), txtSenha (41) e os botoes 'Entrar'/'Criar Nova Conta' (44-52) NAO recebem setFont, ficando em ~12px. Logo a tela tem titulo adequado mas corpo abaixo do minimo.",
+          "impacto": "Hierarquia existe (titulo destacado), mas o conteudo interativo principal — rotulos e o que o usuario digita — fica pequeno. Classificado Parcial por ter titulo correto e o restante deficiente.",
+          "recomendacao": "Aplicar fonte >=16 aos labels, campos e botoes (resolvido por TIP-01 via UIManager). Se mantido localmente: txtEmail.setFont(new Font(\"Arial\", Font.PLAIN, 16)) e equivalente para senha, labels e botoes. Adicionar setLabelFor (lbl E-mail -> txtEmail) e mnemonics (setMnemonic('E')/('S')) para reforco de acessibilidade.",
+          "severidade": "Media",
+          "perfilAfetado": [
+            "visual (baixa visao)",
+            "idosos"
+          ]
+        },
+        {
+          "id": "TIP-05",
+          "titulo": "Painel de status em Arial BOLD 14 (abaixo de 16px)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "46-50",
+          "classificacao": "Parcial",
+          "criterio": "Criterio 2 - tamanho >=16px",
+          "evidencia": "Font fontStatus = new Font(\"Arial\", Font.BOLD, 14); aplicada a lblJogador/lblPontos/lblFase/lblPosicao (47-50). Sao 14px (2px abaixo do minimo). O negrito ajuda a legibilidade, mas o tamanho ainda nao atinge 16.",
+          "impacto": "Informacao de jogo mais consultada (pontos, fase, posicao) fica 2px abaixo do minimo; impacto moderado por estar em negrito e sobre fundo de alto contraste (18.2:1).",
+          "recomendacao": "Elevar para new Font(\"Arial\", Font.BOLD, 16) (ou 18 para dar destaque de subtitulo coerente com a hierarquia). Cabe no GridLayout(1,4) do topo sem problema de espaco.",
+          "severidade": "Media",
+          "perfilAfetado": [
+            "visual (baixa visao)",
+            "idosos"
+          ]
+        },
+        {
+          "id": "TIP-06",
+          "titulo": "Botoes de opcao do desafio em Arial PLAIN 14 (abaixo de 16px)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaDesafio.java",
+          "linha": "30-41",
+          "classificacao": "Parcial",
+          "criterio": "Criterio 2 - tamanho >=16px + hierarquia",
+          "evidencia": "txtPergunta usa Arial BOLD 16 (linha 30, adequado e funciona como titulo/subtitulo da pergunta), mas cada botao de resposta usa btn.setFont(new Font(\"Arial\", Font.PLAIN, 14)) (linha 41). As 4 opcoes — texto que o usuario precisa ler para decidir a resposta — ficam 2px abaixo do minimo.",
+          "impacto": "No momento de maior carga cognitiva (responder o desafio) o texto das alternativas e o menor da tela. Afeta leitura e decisao para baixa visao e cognitivo.",
+          "recomendacao": "Elevar as opcoes para new Font(\"Arial\", Font.PLAIN, 16) (mantendo a pergunta em BOLD 16/18 para preservar hierarquia pergunta>opcao). Resolvido tambem por TIP-01 se Button.font virar default 16. Considerar mnemonics A/B/C/D e setAccessibleDescription nas opcoes.",
+          "severidade": "Media",
+          "perfilAfetado": [
+            "visual (baixa visao)",
+            "cognitivo"
+          ]
+        },
+        {
+          "id": "TIP-07",
+          "titulo": "btnRanking e btnSair sem fonte definida (herdam ~12px Nimbus)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "72-86",
+          "classificacao": "Parcial",
+          "criterio": "Criterio 2 - tamanho >=16px + hierarquia/consistencia",
+          "evidencia": "btnRanking = new JButton(\"Ver Ranking Global\") (linha 72) e btnSair = new JButton(\"Logout\") (linha 86) nao recebem setFont, ao contrario do btnDado que tem Arial BOLD 18 (linha 81). Ficam em ~12px, criando inconsistencia de tamanho entre botoes da mesma tela.",
+          "impacto": "Botoes de acao secundarios pequenos e visualmente inconsistentes com o botao principal; reduz legibilidade e clareza de qual elemento e clicavel para baixa visao/cognitivo.",
+          "recomendacao": "Aplicar fonte >=16 (ex.: new Font(\"Arial\", Font.PLAIN, 16) ou BOLD 16) a btnRanking e btnSair para consistencia; resolvido em massa por TIP-01 (Button.font default 16). Manter btnDado maior (18) como acao primaria preserva hierarquia.",
+          "severidade": "Baixa",
+          "perfilAfetado": [
+            "visual (baixa visao)",
+            "cognitivo"
+          ]
+        },
+        {
+          "id": "TIP-08",
+          "titulo": "Log e pergunta em JTextArea sem entrelinha aumentada (espacamento de linha padrao)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "66-68",
+          "classificacao": "Parcial",
+          "criterio": "Criterio 2 - espacamento entre linhas / blocos longos",
+          "evidencia": "txtLog e um JTextArea com Monospaced PLAIN 12 (linha 68) que recebe varias linhas via append() em jogarDado (linhas 131,150). JTextArea nao suporta line-spacing: as linhas ficam coladas (leading padrao da fonte). Mesma limitacao em TelaDesafio txtPergunta (JTextArea, linha 26), que com setLineWrap(true) pode gerar varias linhas sem entrelinha extra. A atividade pede 'espacamento entre linhas/paragrafos' e 'evitar blocos longos'.",
+          "impacto": "Texto corrido sem respiro entre linhas dificulta rastreamento visual (baixa visao) e leitura (dislexia). O log em 12px monoespacado e pequeno; a pergunta, embora 16px, pode formar bloco denso.",
+          "recomendacao": "Aumentar a fonte do log para >=14-16 (new Font(\"Monospaced\", Font.PLAIN, 16)) e, para entrelinha real, migrar txtPergunta/log para JTextPane com StyledDocument e StyleConstants.setLineSpacing(attr, 0.3f) aplicado via setParagraphAttributes. Alternativa simples: manter JTextArea porem com fonte maior e inserir linha em branco entre entradas do log para arejar.",
+          "severidade": "Baixa",
+          "perfilAfetado": [
+            "visual (baixa visao)",
+            "cognitivo (dislexia)"
+          ]
+        },
+        {
+          "id": "TIP-09",
+          "titulo": "Ausencia de zoom/ajuste de tamanho de fonte e login nao redimensionavel",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaLogin.java",
+          "linha": "22",
+          "classificacao": "Inadequado",
+          "criterio": "Criterio 2 - ajuste de fonte / redimensionamento (WCAG 1.4.4 adaptado)",
+          "evidencia": "setResizable(false) na TelaLogin (linha 22) fixa a janela em 400x350, impedindo ampliacao. Nenhuma das 5 telas oferece controle de aumento de fonte/zoom (nao ha botao A+/A-, atalho Ctrl++ nem reaplicacao de UIManager font em runtime). Como nao ha CSS/zoom de navegador (app desktop), o usuario nao tem como ampliar o texto.",
+          "impacto": "Usuario com baixa visao nao consegue aumentar o texto por nenhum meio dentro do app; combinado com as fontes <16px isso inviabiliza o uso. E a barreira mais limitante do criterio.",
+          "recomendacao": "Remover setResizable(false) (ou definir tamanho minimo em vez de fixo). Implementar controle de tamanho de fonte global: botoes/atalhos A+/A- que recalculam um fator e reaplicam UIManager font defaults + SwingUtilities.updateComponentTreeUI(frame) em todas as telas, OU disponibilizar selecao de tamanho base (Normal/Grande/Extra) persistida. Centralizar a fonte base em Main (TIP-01) facilita esse ajuste em runtime.",
+          "severidade": "Alta",
+          "perfilAfetado": [
+            "visual (baixa visao)",
+            "idosos",
+            "motor (janela maior facilita alvo)"
+          ]
+        },
+        {
+          "id": "TIP-10",
+          "titulo": "Hierarquia tipografica inconsistente entre telas",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "37-50",
+          "classificacao": "Parcial",
+          "criterio": "Criterio 2 - hierarquia (titulos/subtitulos consistentes)",
+          "evidencia": "A TelaTabuleiro nao tem um JLabel de titulo de tela; usa apenas TitledBorder 'Status do Jogador' (linha 38) e 'Historico da Partida' (linha 70) com fonte padrao da borda (~12px) como unica marcacao de secao. A TelaLogin tem titulo BOLD 20, a TelaCadastro nao tem titulo, o desafio usa a pergunta BOLD 16 como titulo. Ou seja, nao ha um padrao de escala tipografica (H1/H2/corpo) consistente entre as telas.",
+          "impacto": "Falta de hierarquia previsivel dificulta a orientacao de usuarios cognitivos e de baixa visao, que se apoiam em titulos destacados para localizar secoes. As TitledBorder em 12px sao fracas como cabecalho.",
+          "recomendacao": "Definir uma escala consistente: titulo de tela BOLD 20, subtitulo/secao BOLD 16, corpo PLAIN 16. Adicionar titulo de tela na TelaTabuleiro e TelaCadastro. Aumentar a fonte das TitledBorder via UIManager.put(\"TitledBorder.font\", new Font(\"Arial\", Font.BOLD, 16)) (ligado a TIP-01) ou border.setTitleFont(...).",
+          "severidade": "Baixa",
+          "perfilAfetado": [
+            "cognitivo (orientacao)",
+            "visual (baixa visao)"
+          ]
+        }
+      ]
+    },
+    {
+      "dimensao": "Criterio 3 - Layout e Interacao",
+      "resumo": "Avaliacao de layout, alvos de clique, navegacao, foco/teclado, destaque de elementos e feedback nas quatro telas Swing (Nimbus). O projeto acerta em pontos isolados: btnDado tem setPreferredSize(200,50) garantindo alvo amplo; TelaDesafio usa botoes em GridLayout(4,1) com gap 10 (alvos grandes e bem espacados) e dialogo modal; o tabuleiro usa gaps de 8px e bordas. Porem ha falhas sistemicas de INTERACAO que afetam principalmente perfis MOTORES (dependentes de teclado) e COGNITIVOS (clareza/feedback/recuperacao): (1) nenhuma tela define botao default via getRootPane().setDefaultButton — pressionar Enter no login/cadastro/desafio NAO confirma a acao, obrigando uso do mouse; (2) nenhum componente recebe foco inicial (requestFocusInWindow) — o leitor de tela e o usuario de teclado iniciam sem ponto de partida; (3) ausencia total de mnemonics/atalhos (setMnemonic) e de acoes de teclado para LANCAR DADO e para escolher opcoes do desafio; (4) botoes secundarios btnSair(Logout), btnRanking e btnSalvar/btnCadastrar nao tem setPreferredSize, ficando com altura/largura minimas do Nimbus (~pequenos) — alvo de clique reduzido para baixa precisao motora; (5) Logout fica imediatamente ao lado do botao primario LANCAR DADO no mesmo FlowLayout, com so 20px de gap e sem confirmacao, risco de saida acidental da partida (perda de progresso = falha cognitiva de recuperacao de erro); (6) o destaque da casa atual (borda vermelha) nao rola o JScrollPane para a casa visivel (scrollRectToVisible ausente) — em tabuleiro 6x5 a posicao corrente pode ficar fora da area visivel; (7) fluxo de janelas confuso: TelaCadastro abre como JFrame independente nao-modal sobre TelaLogin, permitindo multiplas janelas e foco ambiguo; (8) TelaLogin com setResizable(false) impede o usuario de ampliar a janela para compensar baixa visao. O relatorio inclui roteiro de teste de usabilidade com 1 participante (exigido pela atividade).",
+      "constatacoes": [
+        {
+          "id": "C3-01",
+          "titulo": "Login sem botao default: Enter nao confirma o formulario",
+          "arquivo": "src/com/maua/jogo/view/TelaLogin.java",
+          "linha": "44-48, 56-65",
+          "criterio": "WCAG 2.1.1 (Teclado) / Heuristica Cheiran de acesso por teclado em jogos / Criterio 3 navegacao intuitiva",
+          "classificacao": "Inadequado",
+          "severidade": "Alta",
+          "impacto": "btnEntrar nunca e registrado como botao default (getRootPane().setDefaultButton ausente). Apos digitar e-mail/senha, pressionar Enter nao dispara o login — o usuario e obrigado a alcancar o mouse e clicar no botao. Usuarios motores que operam so por teclado e usuarios de leitor de tela perdem o fluxo natural de submissao de formulario; tambem frustra a expectativa cognitiva basica (Enter = enviar).",
+          "perfilAfetado": [
+            "motora",
+            "visual",
+            "cognitiva"
+          ],
+          "recomendacao": "Adicionar no fim de initComponents(): getRootPane().setDefaultButton(btnEntrar); (precisa que pnlPrincipal ja esteja adicionado ao frame). Opcional reforco: txtSenha.addActionListener para tambem submeter. Garante Enter = Entrar."
+        },
+        {
+          "id": "C3-02",
+          "titulo": "Cadastro e Desafio tambem sem botao default e sem foco inicial",
+          "arquivo": "src/com/maua/jogo/view/TelaCadastro.java; src/com/maua/jogo/view/TelaDesafio.java",
+          "linha": "TelaCadastro.java:29,38; TelaDesafio.java:39-45",
+          "criterio": "WCAG 2.1.1 / 2.4.3 (Ordem de foco) / Criterio 3 navegacao intuitiva",
+          "classificacao": "Inadequado",
+          "severidade": "Media",
+          "impacto": "Em TelaCadastro, btnSalvar nao e default — Enter no campo Senha nao cadastra. Em TelaDesafio (JDialog modal), nenhum dos 4 botoes de opcao recebe foco inicial nem ha botao default, e o dialogo abre sem foco definido, deixando o usuario de teclado/leitor de tela sem ponto de partida e sem saber que ha 4 opcoes navegaveis.",
+          "perfilAfetado": [
+            "motora",
+            "visual",
+            "cognitiva"
+          ],
+          "recomendacao": "TelaCadastro: getRootPane().setDefaultButton(btnSalvar). TelaDesafio: dar foco a primeira opcao apos montar (ex.: SwingUtilities.invokeLater(() -> primeiroBotao.requestFocusInWindow())) e, se houver botao de confirmar, defini-lo como default. Definir tambem ordem de foco coerente (campos -> botao)."
+        },
+        {
+          "id": "C3-03",
+          "titulo": "Nenhum foco inicial definido ao abrir as telas",
+          "arquivo": "src/com/maua/jogo/view/TelaLogin.java; src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "TelaLogin.java:37; TelaTabuleiro.java:30-98",
+          "criterio": "WCAG 2.4.3 (Ordem de foco) / 4.1.2 (Nome, funcao, valor) com Java Accessibility API",
+          "classificacao": "Parcial",
+          "severidade": "Media",
+          "impacto": "Ao exibir TelaLogin o campo txtEmail nao recebe foco programatico (requestFocusInWindow ausente); o usuario de teclado precisa dar Tab as cegas ou clicar. Em TelaTabuleiro nenhum elemento (ex.: btnDado) recebe foco, entao o leitor de tela nao anuncia automaticamente o controle principal e o jogador de teclado nao sabe onde esta.",
+          "perfilAfetado": [
+            "motora",
+            "visual"
+          ],
+          "recomendacao": "TelaLogin: apos setVisible, txtEmail.requestFocusInWindow(). TelaTabuleiro: dar foco inicial a btnDado (SwingUtilities.invokeLater(() -> btnDado.requestFocusInWindow())). Reforca ordem de foco previsivel exigida no criterio de navegacao intuitiva."
+        },
+        {
+          "id": "C3-04",
+          "titulo": "Botoes secundarios sem setPreferredSize: alvo de clique pequeno",
+          "arquivo": "src/com/maua/jogo/view/TelaTabuleiro.java; src/com/maua/jogo/view/TelaCadastro.java; src/com/maua/jogo/view/TelaLogin.java",
+          "linha": "TelaTabuleiro.java:72,86; TelaCadastro.java:29; TelaLogin.java:50",
+          "criterio": "WCAG 2.5.5 (Tamanho do alvo) / NBR mobilidade / Criterio 3 espacamento evita erro de clique",
+          "classificacao": "Parcial",
+          "severidade": "Media",
+          "impacto": "btnDado tem setPreferredSize(200,50) (bom). Ja btnSair(Logout), btnRanking, btnSalvar(Cadastrar) e btnCadastrar(Criar Nova Conta) NAO definem preferredSize, herdando a altura minima padrao do Nimbus (~24-26px). Para usuarios com baixa precisao motora (tremor, mouse impreciso, touchpad) o alvo fica abaixo do recomendado (~44px), aumentando erros de clique.",
+          "perfilAfetado": [
+            "motora"
+          ],
+          "recomendacao": "Definir setPreferredSize com altura >=44px nos botoes acionaveis: ex. btnSair.setPreferredSize(new Dimension(120,44)); btnRanking.setPreferredSize(new Dimension(180,40)); btnSalvar.setPreferredSize(new Dimension(0,40)) (em GridLayout a altura ja e dada pela celula — ver C3-06). Manter padronizacao visual entre botoes."
+        },
+        {
+          "id": "C3-05",
+          "titulo": "Logout adjacente ao botao primario sem confirmacao: saida acidental da partida",
+          "arquivo": "src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "79-95, 86-91",
+          "criterio": "WCAG 3.3.4 (Prevencao de erros) / Heuristica Cheiran (evitar acoes destrutivas acidentais) / Criterio 3",
+          "classificacao": "Inadequado",
+          "severidade": "Alta",
+          "impacto": "btnDado (LANCAR DADO, acao mais frequente) e btnSair (Logout, acao destrutiva que encerra a partida e descarta progresso da sessao) ficam no MESMO FlowLayout, lado a lado, separados por apenas 20px de hgap. Um clique impreciso em btnSair faz logout imediato sem dialogo de confirmacao — falha cognitiva de recuperacao de erro e risco motor. O usuario perde a posicao/contexto da jornada atual.",
+          "perfilAfetado": [
+            "motora",
+            "cognitiva"
+          ],
+          "recomendacao": "1) Separar fisicamente: mover Logout para canto oposto (ex.: outro painel ou BorderLayout.LINE_START) e centralizar LANCAR DADO. 2) Adicionar confirmacao: int r = JOptionPane.showConfirmDialog(this, \"Sair encerra a partida atual. Deseja continuar?\", \"Confirmar Logout\", JOptionPane.YES_NO_OPTION); e so prosseguir se YES. 3) Aumentar o hgap do FlowLayout ou usar inset maior entre os dois botoes."
+        },
+        {
+          "id": "C3-06",
+          "titulo": "TelaCadastro em GridLayout(8,1): campos e labels com mesma altura desproporcional e sem hierarquia de espacamento",
+          "arquivo": "src/com/maua/jogo/view/TelaCadastro.java",
+          "linha": "23-40",
+          "criterio": "Criterio 3 layout/espacamento; WCAG 1.3.1 (Info e relacoes) / 3.3.2 (Rotulos)",
+          "classificacao": "Parcial",
+          "severidade": "Baixa",
+          "impacto": "O GridLayout(8,1) forca todas as 8 celulas (3 labels, 3 campos, 1 espacador vazio, 1 botao) ao mesmo tamanho, esticando campos de texto e o botao para alturas grandes e iguais, sem agrupar visualmente rotulo+campo. Nao ha vinculo de rotulo (setLabelFor) nem mnemonics, e o espacador e um JLabel vazio (gambiarra de layout). Isso reduz a clareza de leitura/relacao rotulo-campo para usuarios cognitivos e leitores de tela.",
+          "perfilAfetado": [
+            "cognitiva",
+            "visual"
+          ],
+          "recomendacao": "Migrar para GridBagLayout (como TelaLogin) agrupando label e campo na mesma linha; usar lbl.setLabelFor(campo) para o leitor de tela associar rotulo ao campo; remover o JLabel vazio e controlar espacamento via Insets/EmptyBorder; adicionar mnemonics (setDisplayedMnemonic) nos rotulos."
+        },
+        {
+          "id": "C3-07",
+          "titulo": "Ausencia de mnemonics e atalhos de teclado nos botoes",
+          "arquivo": "src/com/maua/jogo/view/TelaTabuleiro.java; src/com/maua/jogo/view/TelaDesafio.java; src/com/maua/jogo/view/TelaLogin.java",
+          "linha": "TelaTabuleiro.java:80,86,72; TelaDesafio.java:40; TelaLogin.java:44,50",
+          "criterio": "WCAG 2.1.1 (Teclado) / 2.4.1 / Heuristica Cheiran (operacao por teclado)",
+          "classificacao": "Inadequado",
+          "severidade": "Media",
+          "impacto": "Nenhum botao define setMnemonic, e a acao principal LANCAR DADO so e acionavel por clique ou Tab+Espaco; nao ha tecla rapida (ex.: Alt+D) nem atalho global. As 4 opcoes do desafio nao tem teclas (1-4) nem mnemonics. Usuarios que dependem de teclado precisam tabular muitos elementos, o que e lento e desorientador num jogo de turnos.",
+          "perfilAfetado": [
+            "motora",
+            "visual"
+          ],
+          "recomendacao": "btnDado.setMnemonic('D'); btnSair.setMnemonic('L'); btnRanking.setMnemonic('R'); btnEntrar.setMnemonic('E'). Em TelaDesafio, mapear teclas 1-4 via InputMap/ActionMap do rootPane para cada opcao e setMnemonic correspondente. Considerar registrar tecla de espaco/Enter como atalho de LANCAR DADO no rootPane do tabuleiro."
+        },
+        {
+          "id": "C3-08",
+          "titulo": "Casa atual destacada nao e rolada para a area visivel do JScrollPane",
+          "arquivo": "src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "61, 154-167",
+          "criterio": "WCAG 2.4.3/2.4.7 (foco/visibilidade) / Criterio 3 destaque de elementos importantes",
+          "classificacao": "Parcial",
+          "severidade": "Media",
+          "impacto": "O tabuleiro (GridLayout 6x5 = 30 casas) fica dentro de um JScrollPane. Ao mover, atualizarInterface() apenas troca a borda da casa atual para vermelha, mas nao chama scrollRectToVisible — se a janela for reduzida ou a casa estiver fora da viewport, o jogador nao ve onde esta. O destaque tambem e somente cor (vermelho), problema reforcado pelo criterio de cor-como-unico-meio.",
+          "perfilAfetado": [
+            "visual",
+            "cognitiva"
+          ],
+          "recomendacao": "Em atualizarInterface(), apos identificar a casa atual, chamar casasGraficas.get(idx).scrollRectToVisible(casasGraficas.get(idx).getBounds()) (ou pnlTabuleiro.scrollRectToVisible) para rolar ate ela. Complementar o destaque com icone/rotulo \"VOCE\" alem da borda (ver criterio de cor)."
+        },
+        {
+          "id": "C3-09",
+          "titulo": "Fluxo de janelas confuso: TelaCadastro abre como JFrame nao-modal sobre o Login",
+          "arquivo": "src/com/maua/jogo/view/TelaLogin.java; src/com/maua/jogo/view/TelaCadastro.java",
+          "linha": "TelaLogin.java:67; TelaCadastro.java:7,20",
+          "criterio": "Criterio 3 navegacao intuitiva e fluxo de telas; WCAG 3.2.x (previsibilidade)",
+          "classificacao": "Parcial",
+          "severidade": "Media",
+          "impacto": "btnCadastrar instancia new TelaCadastro(...).setVisible(true) como JFrame independente nao-modal, deixando duas janelas de nivel superior ativas simultaneamente. O usuario pode abrir varias TelaCadastro (clicando repetidamente), alternar foco entre janelas e ficar confuso sobre qual esta ativa; nada bloqueia o Login por tras. Para perfis cognitivos e leitores de tela, multiplas top-level windows sem modalidade aumentam a desorientacao.",
+          "perfilAfetado": [
+            "cognitiva",
+            "visual"
+          ],
+          "recomendacao": "Tornar o cadastro um JDialog modal com o Login como dono (como TelaDesafio faz com o tabuleiro): public TelaCadastro(Frame owner, JogoController c) extends JDialog com super(owner, true). Assim o foco fica preso ate concluir/cancelar e nao ha janelas duplicadas."
+        },
+        {
+          "id": "C3-10",
+          "titulo": "Janela de login com setResizable(false) impede ampliacao pelo usuario",
+          "arquivo": "src/com/maua/jogo/view/TelaLogin.java",
+          "linha": "22",
+          "criterio": "WCAG 1.4.4 (Redimensionamento de texto) adaptado a desktop / Criterio 2-3",
+          "classificacao": "Parcial",
+          "severidade": "Baixa",
+          "impacto": "setResizable(false) no JFrame de login impede que um usuario de baixa visao aumente a janela para acomodar fonte/zoom maiores. Como nao existe controle de zoom/ajuste de fonte em nenhuma tela, travar o redimensionamento remove a unica alavanca manual de ampliacao no login.",
+          "perfilAfetado": [
+            "visual"
+          ],
+          "recomendacao": "Remover setResizable(false) (ou permitir redimensionar) e usar layout que reflua; idealmente oferecer controle de zoom/escala de fonte via UIManager (ex.: aumentar defaults de fonte). No minimo, nao bloquear o redimensionamento."
+        },
+        {
+          "id": "C3-11",
+          "titulo": "Feedback de acao do LANCAR DADO restrito ao log textual; sem confirmacao visual/sonora do resultado",
+          "arquivo": "src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "129-152",
+          "criterio": "WCAG 4.1.3 (Mensagens de status) / Heuristica Cheiran (feedback claro) / Criterio 3 feedback de acao",
+          "classificacao": "Parcial",
+          "severidade": "Baixa",
+          "impacto": "Ao lancar o dado o unico feedback imediato e txtLog.append(\"> Dado: N\") num JTextArea Monospaced 12px lateral; nao ha anuncio acessivel (status announce), nem destaque visual forte do valor, nem feedback sonoro (diferencial previsto no projeto). Um leitor de tela nao e notificado da mudanca do log automaticamente, e usuarios cognitivos podem nao perceber que a jogada ocorreu.",
+          "perfilAfetado": [
+            "visual",
+            "cognitiva"
+          ],
+          "recomendacao": "Expor o resultado tambem num JLabel de status com getAccessibleContext().setAccessibleDescription e/ou usar uma regiao de status que o leitor anuncie; opcionalmente adicionar feedback sonoro (Toolkit.getDefaultToolkit().beep ou clip de audio) como reforco multimodal. Garantir que a area de log tenha rotulo acessivel."
+        },
+        {
+          "id": "C3-12",
+          "titulo": "Componentes sem nome/descricao acessivel (AccessibleContext) para navegacao por leitor de tela",
+          "arquivo": "src/com/maua/jogo/view/TelaTabuleiro.java; src/com/maua/jogo/view/TelaDesafio.java",
+          "linha": "TelaTabuleiro.java:100-127,66-70; TelaDesafio.java:26-46",
+          "criterio": "WCAG 4.1.2 (Nome, funcao, valor) via Java Accessibility API / Criterio 3 navegacao",
+          "classificacao": "Parcial",
+          "severidade": "Media",
+          "impacto": "As casas (JPanel com numero+fase) e o log nao expoem descricao acessivel; o NVDA via Access Bridge encontra apenas labels soltos sem contexto de \"casa X, fase Y, posicao atual\". A interacao por leitor de tela fica pobre: o usuario nao consegue inspecionar o tabuleiro nem entender a posicao logica, comprometendo a navegabilidade.",
+          "perfilAfetado": [
+            "visual"
+          ],
+          "recomendacao": "Para cada pnlCasa: pnlCasa.getAccessibleContext().setAccessibleName(\"Casa \"+pos+\", fase \"+fase) e marcar a atual com setAccessibleDescription(\"posicao atual do jogador\"). Dar nome acessivel ao txtLog (\"Historico da partida\") e aos botoes de opcao. Garantir tab order que inclua as casas se forem navegaveis."
+        }
+      ]
+    },
+    {
+      "dimensao": "Acessibilidade Tecnica & Perfis (visual/motor/cognitivo) + Heuristicas de Acessibilidade em Jogos Digitais",
+      "resumo": "Avaliacao tecnica das 5 telas Swing (TelaLogin, TelaCadastro, TelaTabuleiro, TelaDesafio, Main) quanto a operabilidade por teclado, suporte a leitor de tela (Java Access Bridge/NVDA), alvos de clique motores, feedback nao-visual e clareza/recuperacao de erro cognitiva, mapeados a WCAG, NBR 17225/17060 e diretrizes de acessibilidade em jogos (Cheiran/UFRGS).\n\nVEREDITO GERAL: INADEQUADO para os tres perfis no estado atual. O ponto critico e a CEGUEIRA: a aplicacao e tecnicamente operavel por mouse, mas NAO foi instrumentada para leitor de tela. Em nenhum dos 5 arquivos ha uma unica chamada a getAccessibleContext().setAccessibleName/Description nem setLabelFor; campos de senha, campos de texto, botoes e o proprio estado do jogo (posicao, fase, resultado do dado, acerto/erro do desafio) sao anunciados pelo NVDA apenas pelo texto visivel ou nao sao anunciados, deixando o jogador cego sem modelo mental do tabuleiro.\n\nPERFIL MOTOR: parcialmente atendido. btnDado tem setPreferredSize(200x50) (alvo bom), mas btnEntrar/btnCadastrar (TelaLogin), btnSalvar (TelaCadastro), btnSair/btnRanking (Tabuleiro) e os 4 botoes de opcao (TelaDesafio) ficam na altura padrao Nimbus (~25-28px), abaixo do alvo recomendado 44x44px (WCAG 2.5.5 / NBR mobile). Nao ha nenhum mnemonic (setMnemonic), accelerator nem botao default (getRootPane().setDefaultButton) — quem nao usa mouse depende so de Tab+Espaco, e nao consegue acionar Entrar com a tecla Enter.\n\nPERFIL COGNITIVO: parcialmente atendido. Ha feedback textual de acerto/erro e log de partida (bom), mas as mensagens de erro sao genericas via JOptionPane, sem identificar QUAL campo falhou (WCAG 3.3.1/3.3.3); o foco nao volta ao campo problematico; nao ha confirmacao de Logout (acao destrutiva que descarta a partida) nem confirmacao ao fechar o JFrame (EXIT_ON_CLOSE encerra a JVM inteira sem aviso).\n\nHEURISTICAS DE JOGO (Cheiran): falham feedback redundante (so visual+textual, sem som — o resultado do dado e a movimentacao nao tem alternativa sonora/tatil), distincao de estados por cor unica (fases e \"voce esta aqui\" so por cor — WCAG 1.4.1) e controles remapeaveis/ajuste de legibilidade (nao ha zoom nem ajuste de fonte; login com setResizable(false) impede ate redimensionar). Nao ha pressao de tempo (positivo). A seguir, constatacoes especificas com arquivo:linha.",
+      "constatacoes": [
+        {
+          "id": "AT-01",
+          "titulo": "Ausencia total de suporte a leitor de tela (Java Accessibility API) em toda a aplicacao",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaLogin.java",
+          "linha": "9-54 (e analogamente em TelaCadastro, TelaTabuleiro, TelaDesafio)",
+          "criterio": "WCAG 4.1.2 Nome, Funcao, Valor / NBR 17225 / Cheiran: feedback acessivel e compatibilidade com tecnologia assistiva",
+          "classificacao": "Inadequado",
+          "severidade": "Alta",
+          "perfilAfetado": [
+            "visual-cegueira",
+            "visual-baixa-visao"
+          ],
+          "evidencia": "Nenhum dos 5 arquivos contem chamada a getAccessibleContext().setAccessibleName/setAccessibleDescription ou setLabelFor. Ex.: txtEmail=new JTextField(20); txtSenha=new JPasswordField(20) (linhas 37,41) sem nome acessivel; JLabel 'E-mail:'/'Senha:' (linhas 36,40) nao sao associadas via setLabelFor aos campos.",
+          "impacto": "Com NVDA + Java Access Bridge, o leitor de tela anuncia os campos apenas como 'caixa de edicao' / 'caixa de senha' sem rotulo, e botoes/labels sem descricao de funcao. O jogador cego nao identifica em qual campo esta nem o proposito dos controles, inviabilizando login, cadastro e jogo de forma autonoma.",
+          "recomendacao": "Para CADA campo e botao chamar getAccessibleContext().setAccessibleName(...) e setAccessibleDescription(...). Associar rotulos aos campos: criar 'JLabel lblEmail=new JLabel(\"E-mail:\"); lblEmail.setLabelFor(txtEmail);' (idem Senha/Nome). Garantir que a Java Access Bridge esteja habilitada (jabswitch -enable) e documentar no manual do usuario."
+        },
+        {
+          "id": "AT-02",
+          "titulo": "Tabuleiro nao expoe estado nem semantica ao leitor de tela (jogador cego sem modelo do jogo)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "100-127, 154-167",
+          "criterio": "WCAG 1.3.1 Info e Relacoes / 4.1.3 Mensagens de Status / Cheiran: estado do jogo perceptivel sem visao",
+          "classificacao": "Inadequado",
+          "severidade": "Alta",
+          "perfilAfetado": [
+            "visual-cegueira",
+            "visual-baixa-visao",
+            "cognitivo"
+          ],
+          "evidencia": "As 30 casas sao JPanel decorativos (inicializarCasas, 100-127) sem nome acessivel; a posicao atual e marcada SO por borda vermelha (createLineBorder(Color.RED,4), linha 162). atualizarInterface (154-167) muda texto de labels e bordas, mas nao emite mensagem de status acessivel. O resultado do dado so vai para txtLog (jogarDado, linha 131), um JTextArea que o NVDA nao le automaticamente ao mudar.",
+          "impacto": "O jogador cego nao percebe onde esta no tabuleiro, qual fase ocupa, nem o resultado do dado ou a mudanca de pontuacao. O nucleo do jogo (mover-se e perceber progresso) e inacessivel sem visao.",
+          "recomendacao": "Dar a cada pnlCasa um nome acessivel ('Casa 5, fase Conector, sua posicao atual'). Apos mover, anunciar status: usar pnlStatus com getAccessibleContext() e firePropertyChange de ACCESSIBLE_NAME, ou exibir o resultado em um JLabel com role de status e chamar requestFocus, para que o NVDA leia 'Dado: 4, voce avancou para a casa 9'. Tornar a posicao atual focavel (setFocusable(true)) e mover o foco para ela a cada jogada."
+        },
+        {
+          "id": "AT-03",
+          "titulo": "Nenhuma operabilidade por teclado: sem mnemonics, accelerators e botao default",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaLogin.java",
+          "linha": "44-52, 56-67",
+          "criterio": "WCAG 2.1.1 Teclado / 2.4.3 Ordem de Foco / Cheiran: controles alternativos e atalhos",
+          "classificacao": "Inadequado",
+          "severidade": "Alta",
+          "perfilAfetado": [
+            "motor",
+            "visual-cegueira"
+          ],
+          "evidencia": "btnEntrar e btnCadastrar (44-52) nao chamam setMnemonic; nenhuma tela chama getRootPane().setDefaultButton(btnEntrar). O mesmo padrao se repete em btnSalvar (TelaCadastro:29), btnDado/btnSair/btnRanking (TelaTabuleiro:72,80,86) e nos 4 botoes de opcao (TelaDesafio:40).",
+          "impacto": "Pressionar Enter no campo de senha NAO faz login; usuario de teclado/leitor de tela precisa tabular ate o botao e apertar Espaco. Sem teclas de acesso (Alt+E etc.) a navegacao e lenta e nao descobrivel, prejudicando perfis motor e cego.",
+          "recomendacao": "Definir botao padrao: getRootPane().setDefaultButton(btnEntrar) na TelaLogin (e btnSalvar no cadastro). Adicionar mnemonics: btnEntrar.setMnemonic('E'), btnDado.setMnemonic('L'), etc. Para o dado, registrar accelerator global via getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(\"SPACE\"),...). Verificar/ajustar a ordem de Tab (setFocusTraversalPolicy) p/ seguir email->senha->entrar."
+        },
+        {
+          "id": "AT-04",
+          "titulo": "Feedback do dado e da movimentacao apenas visual/textual: sem alternativa sonora (jogo)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "129-152",
+          "criterio": "WCAG 1.1.1 (alternativa nao-textual) / Cheiran: feedback redundante (visual+sonoro+textual) e diferencial 'feedback sonoro' da especificacao",
+          "classificacao": "Inadequado",
+          "severidade": "Media",
+          "perfilAfetado": [
+            "visual-cegueira",
+            "visual-baixa-visao",
+            "cognitivo"
+          ],
+          "evidencia": "jogarDado (129-152) gera o valor e apenas faz txtLog.append('> Dado: '+valor) e chama atualizarInterface(); nao ha emissao de som nem leitura automatica. A acao central do jogo so produz mudancas visuais e um texto em area de log nao-focada.",
+          "impacto": "Ausencia do feedback redundante exigido por heuristicas de jogo: nao ha canal sonoro nem leitura ativa. Jogador cego ou com baixa visao nao percebe que jogou nem o resultado; tambem perde-se o diferencial 'feedback sonoro' previsto na especificacao do projeto.",
+          "recomendacao": "Adicionar feedback redundante: tocar som curto ao lancar o dado e ao acertar/errar (ex.: java.awt.Toolkit.getDefaultToolkit().beep() como minimo, ou Clip do javax.sound.sampled com sons distintos p/ acerto/erro). Em paralelo, anunciar o resultado por leitor de tela (ver AT-02). Garantir que o som NAO seja o unico meio (manter texto)."
+        },
+        {
+          "id": "AT-05",
+          "titulo": "Cor como unico meio para distinguir fases e posicao atual",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "115-122, 162",
+          "criterio": "WCAG 1.4.1 Uso de Cores / Cheiran: nao depender de cor para informacao de jogo",
+          "classificacao": "Inadequado",
+          "severidade": "Alta",
+          "perfilAfetado": [
+            "visual-daltonismo",
+            "visual-baixa-visao",
+            "visual-monocromatica"
+          ],
+          "evidencia": "As 6 fases diferem apenas pelo matiz de fundos pastel de luminancia quase identica (linhas 116-121; contraste entre pares de fundo chega a ~1.02:1). A posicao atual e indicada SO por borda vermelha (linha 162). A label de fase (lblDesc, linha 109-110) usa Arial ITALIC 10, pequena demais para compensar.",
+          "impacto": "Para daltonismo vermelho-verde e visao monocromatica, as fases ficam indistinguiveis e o marcador vermelho 'voce esta aqui' se confunde com bordas comuns. A informacao de estado do jogo se perde sem o canal de cor.",
+          "recomendacao": "Adicionar meio redundante alem da cor: rotulo/icone de fase legivel em cada casa (aumentar lblDesc para >=14px nao-italico, ou prefixo textual da fase) e marcar a posicao atual tambem com simbolo/texto (ex.: icone 'voce' ou label 'AQUI') alem da borda. Opcionalmente usar padroes/hachuras distintos por fase via setBorder/Icon, nao so Color."
+        },
+        {
+          "id": "AT-06",
+          "titulo": "Mensagens de erro genericas que nao identificam o campo e nao devolvem o foco",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaCadastro.java",
+          "linha": "47-57",
+          "criterio": "WCAG 3.3.1 Identificacao de Erro / 3.3.3 Sugestao de Erro / Cheiran: clareza e recuperacao de erro",
+          "classificacao": "Parcial",
+          "severidade": "Media",
+          "perfilAfetado": [
+            "cognitivo",
+            "visual-cegueira",
+            "motor"
+          ],
+          "evidencia": "No cadastro, validacao unica 'Todos os campos sao obrigatorios!' (linha 48) nao diz QUAL campo faltou nem move o foco para ele; 'Erro: E-mail ja cadastrado!' (linha 56) nao foca txtEmail. Em TelaLogin a mensagem 'E-mail ou senha invalidos!' (TelaLogin:63) tampouco re-foca o campo. JOptionPane sem nome acessivel proprio.",
+          "impacto": "Usuario com limitacao cognitiva nao sabe o que corrigir; usuario cego ou de teclado precisa re-tabular do zero ate achar o campo problematico, aumentando esforco e erro.",
+          "recomendacao": "Validar campo a campo e, ao falhar, chamar campoProblema.requestFocusInWindow() e mensagem especifica ('Informe o e-mail'). Opcional: marcar visualmente o campo (setBorder vermelho + setToolTipText) e expor a mensagem via setAccessibleDescription para leitura imediata pelo leitor de tela."
+        },
+        {
+          "id": "AT-07",
+          "titulo": "Logout e fechamento de janela sem confirmacao (acao destrutiva descarta a partida)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "33, 86-91",
+          "criterio": "WCAG 3.3.4 Prevencao de Erros / Cheiran: prevencao de acoes irreversiveis acidentais",
+          "classificacao": "Parcial",
+          "severidade": "Media",
+          "perfilAfetado": [
+            "cognitivo",
+            "motor"
+          ],
+          "evidencia": "btnSair (86-91) faz controller.logout() e troca de tela imediatamente, sem JOptionPane de confirmacao. Alem disso setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE) (linha 33) encerra a JVM ao clicar no X, sem aviso e perdendo a partida em andamento.",
+          "impacto": "Clique acidental (especialmente perfil motor) ou no botao errado encerra a partida e descarta progresso sem chance de desfazer; usuario cognitivo nao recebe alerta sobre a consequencia.",
+          "recomendacao": "Antes do logout, chamar JOptionPane.showConfirmDialog(this, 'Sair encerrara a partida atual. Continuar?', ..., YES_NO_OPTION) e prosseguir so no YES. Trocar EXIT_ON_CLOSE por DO_NOTHING_ON_CLOSE + WindowListener com a mesma confirmacao. Aumentar a distancia/alvo do btnSair para reduzir clique acidental (ver AT-08)."
+        },
+        {
+          "id": "AT-08",
+          "titulo": "Alvos de clique abaixo do recomendado (44x44px) na maioria dos botoes",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaDesafio.java",
+          "linha": "35-45",
+          "criterio": "WCAG 2.5.5 Tamanho do Alvo / NBR de acessibilidade movel / Cheiran: alvos amplos para destreza reduzida",
+          "classificacao": "Parcial",
+          "severidade": "Media",
+          "perfilAfetado": [
+            "motor",
+            "visual-baixa-visao"
+          ],
+          "evidencia": "Os 4 botoes de opcao (TelaDesafio:40-44) ficam na altura padrao Nimbus (~25-28px) sem setPreferredSize. Idem btnEntrar/btnCadastrar (TelaLogin:44,50), btnSalvar (TelaCadastro:29), btnSair/btnRanking (TelaTabuleiro:72,86). Apenas btnDado tem setPreferredSize(200,50) (TelaTabuleiro:84) — bom contraexemplo.",
+          "impacto": "Botoes baixos e, no desafio, encostados (gap de 10px no GridLayout) aumentam erro de clique para usuarios com tremor/baixa precisao motora e dificultam mira para baixa visao. No desafio, errar o alvo pode selecionar a opcao errada de resposta.",
+          "recomendacao": "Aplicar setPreferredSize(new Dimension(>=200, >=44)) (ou setMargin maior) a todos os botoes de acao e de opcao, padronizando pela referencia do btnDado. Manter/aumentar espacamento entre opcoes (GridLayout vgap) para separar alvos e evitar selecao acidental."
+        },
+        {
+          "id": "AT-09",
+          "titulo": "Sem ajuste de fonte/zoom e janela de login fixa impede ampliacao",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaLogin.java",
+          "linha": "22",
+          "criterio": "WCAG 1.4.4 Redimensionar Texto / NBR / Cheiran: legibilidade ajustavel e opcoes de acessibilidade",
+          "classificacao": "Inadequado",
+          "severidade": "Media",
+          "perfilAfetado": [
+            "visual-baixa-visao",
+            "cognitivo"
+          ],
+          "evidencia": "TelaLogin chama setResizable(false) (linha 22) com tamanho 400x350; nenhuma tela oferece controle de zoom ou de tamanho de fonte. Fontes fixas em px (ex.: lblDesc ITALIC 10 em TelaTabuleiro:110; opcoes PLAIN 14 em TelaDesafio:41) nao escalam.",
+          "impacto": "Usuario de baixa visao nao consegue ampliar o conteudo dentro do app; na tela de login nem redimensionar a janela. Textos pequenos (10-14px) ficam ilegiveis sem recurso de ampliacao.",
+          "recomendacao": "Oferecer ajuste global de fonte via UIManager (ex.: percorrer UIManager defaults e aplicar deriveFont(scale) em resposta a um controle 'A-/A+'), e remover setResizable(false) (ou prover modo de alto contraste/fonte grande). Definir fontes minimas >=16px e evitar italico em rotulos."
+        },
+        {
+          "id": "AT-10",
+          "titulo": "Ranking em JTable sem rotulacao acessivel e dialogo sem nome",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaTabuleiro.java",
+          "linha": "169-184",
+          "criterio": "WCAG 1.3.1 / 4.1.2 / NBR: tabelas com cabecalhos identificaveis por tecnologia assistiva",
+          "classificacao": "Parcial",
+          "severidade": "Baixa",
+          "perfilAfetado": [
+            "visual-cegueira",
+            "cognitivo"
+          ],
+          "evidencia": "mostrarRanking (169-184) monta JTable dentro de JScrollPane exibido por JOptionPane (linha 183) sem getAccessibleContext().setAccessibleName na tabela/dialogo. Sem caption ou descricao do que a tabela representa alem do titulo da janela.",
+          "impacto": "Leitor de tela le celulas sem contexto claro de que e o ranking global e qual o significado de cada coluna no fluxo; experiencia degradada, embora a JTable do Swing ja exponha cabecalhos.",
+          "recomendacao": "Chamar table.getAccessibleContext().setAccessibleName('Ranking global de jogadores') e descrever colunas; garantir foco inicial na tabela ao abrir o dialogo. Considerar tambem oferecer o ranking em texto linear no log para leitura sequencial."
+        }
+      ]
+    },
+    {
+      "dimensao": "Conformidade com a Especificacao (docx) e Entregaveis da Atividade de Acessibilidade",
+      "resumo": "Verifiquei toda a arvore do repositorio (find recursivo, excluindo .git) e os 5 arquivos-fonte de interface. Estado da SPEC TECNICA (docx \"Maua - Jogo Digital Estilo Tabuleiro\"): atendidos -> linguagem Java + interface grafica Swing, MySQL (database.sql com 3 tabelas + 30 desafios), POO em pacotes MVC (model/view/controller/util), e os requisitos funcionais (cadastro, login, registro de progresso em jogadores.posicao/pontos/fase_id, movimentacao por dado, desafios por fase via fase_id, pontuacao, finalizacao com ranking). FALTAM DA SPEC: (1) TESTES UNITARIOS basicos - nao existe pasta test/, nao ha JUnit em lib/ nem referencia a junit em nbproject/; (2) UML - nenhum arquivo .uml/.puml/imagem de diagrama no repo; (3) MANUAL DO USUARIO - so existe LEIA-ME.md (instrucoes de build/instalacao, NAO manual de uso/regras do jogo); (4) apresentacao e demo - nao versionados (podem estar fora do repo). Quanto aos ENTREGAVEIS DA ATIVIDADE DE ACESSIBILIDADE (artefatos do grupo, nao codigo): nao ha NENHUM print de tela, marcacao em Figma (.fig), evidencia de teste com 1 colega, tabela de classificacao Adequado/Parcial/Inadequado, nem o relatorio final (Introducao/Avaliacao/Problemas/Melhorias/Conclusao) presentes no repositorio - todos ausentes. Abaixo, checklist do que ainda precisa ser feito/entregue.",
+      "constatacoes": [
+        {
+          "id": "SPEC-01",
+          "titulo": "Testes unitarios basicos ausentes (exigidos pela spec)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI (raiz do repo)",
+          "linha": "estrutura de diretorios (src/ sem pasta test)",
+          "criterio": "Spec docx - Requisitos tecnicos: TESTES UNITARIOS basicos",
+          "classificacao": "Inadequado",
+          "severidade": "Alta",
+          "evidencia": "find . -not -path './.git/*' nao retorna nenhum arquivo '*test*'; lib/ contem apenas mysql-connector-j.jar (sem junit-*.jar/hamcrest); grep -i junit em nbproject/* nao retorna nada. Todo o codigo esta em src/com/maua/jogo/{model,view,controller,util} sem qualquer classe de teste.",
+          "impacto": "Requisito tecnico obrigatorio da especificacao nao cumprido. Sem testes, regras criticas (moverJogador, proximaFase/finalizacao, responderDesafio/pontuacao, autenticar/cadastrar) nao tem verificacao automatizada, comprometendo nota e confiabilidade.",
+          "perfilAfetado": [
+            "Equipe de desenvolvimento",
+            "Avaliador da spec"
+          ],
+          "recomendacao": "Criar pasta de testes (ex.: test/com/maua/jogo/) e adicionar junit-4.13.2.jar + hamcrest-core ao lib/ e ao classpath de testes do nbproject. Escrever testes JUnit basicos para a logica de dominio sem dependencia de BD: Fase.proximaFase()/getFasePorNumero (incluindo o limite REALIZADOR que nao avanca), Tabuleiro/Casa (mapeamento posicao->fase), JogoController.moverJogador (avanco, fim de jornada) e responderDesafio (acerto/erro e soma de pontos). Mockar/abstrair os DAOs (extrair interface) para testar o controller sem MySQL."
+        },
+        {
+          "id": "SPEC-02",
+          "titulo": "Diagrama UML nao versionado no repositorio",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI (raiz do repo)",
+          "linha": "ausencia de arquivos .uml/.puml/imagem de diagrama",
+          "criterio": "Spec docx - Entregaveis: UML",
+          "classificacao": "Inadequado",
+          "severidade": "Media",
+          "evidencia": "Busca por '*.uml', '*.puml', '*.png', '*.jpg', '*.pdf', '*.svg' em todo o repo (exceto .git) nao retorna nenhum diagrama. Nao ha pasta docs/.",
+          "impacto": "Entregavel formal da spec faltando. O modelo ja existe no codigo (enum Fase, classes Casa/Desafio/Jogador/Partida/Tabuleiro), mas nao ha representacao UML para entrega/avaliacao.",
+          "perfilAfetado": [
+            "Equipe de desenvolvimento",
+            "Avaliador da spec"
+          ],
+          "recomendacao": "Gerar um diagrama de classes UML refletindo o pacote model (Jogador, Partida, Tabuleiro, Casa, Desafio, enum Fase) e as relacoes com controller/util (DAOs e ConexaoBD). Versionar em docs/uml/ como PlantUML (.puml, diffavel) e exportar PNG/PDF. Opcional: incluir diagrama de casos de uso (Cadastrar, Login, Jogar/Lancar dado, Responder desafio, Ver ranking)."
+        },
+        {
+          "id": "SPEC-03",
+          "titulo": "Manual do usuario inexistente (LEIA-ME e apenas guia de build)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/LEIA-ME.md",
+          "linha": "1-29",
+          "criterio": "Spec docx - Entregaveis: MANUAL DO USUARIO",
+          "classificacao": "Parcial",
+          "severidade": "Media",
+          "evidencia": "LEIA-ME.md descreve apenas como abrir no NetBeans, configurar o MySQL (database.sql) e rodar (INSTALAR_E_JOGAR.bat). Nao ha secao de COMO JOGAR: objetivo, regras de movimentacao, fases (Explorador->Realizador), funcionamento dos desafios/pontuacao, ranking ou condicao de fim de jornada.",
+          "impacto": "Manual do usuario, exigido pela spec, esta parcialmente coberto: existe doc tecnico de instalacao, mas falta a parte voltada ao jogador final (uso do jogo).",
+          "perfilAfetado": [
+            "Usuario final / jogador",
+            "Avaliador da spec"
+          ],
+          "recomendacao": "Criar docs/MANUAL_DO_USUARIO.md (ou PDF) com: objetivo do jogo, fluxo Cadastro->Login->Tabuleiro, como lancar o dado, como responder desafios e ganhar pontos, descricao das 6 fases, como ver o ranking e como a jornada termina. Incluir screenshots de cada tela (que tambem servem ao entregavel de acessibilidade ACESS-01)."
+        },
+        {
+          "id": "SPEC-04",
+          "titulo": "Script SQL presente e consistente com o codigo",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/database.sql",
+          "linha": "1-60+",
+          "criterio": "Spec docx - Requisitos tecnicos: MySQL / Entregaveis: script SQL",
+          "classificacao": "Adequado",
+          "severidade": "Baixa",
+          "evidencia": "database.sql (7 KB) faz DROP/CREATE DATABASE jogo_maua e cria tabelas jogadores (posicao, pontos, fase_id, ativo), desafios (opcao_a..d, resposta_correta, fase_id) e partidas (FK jogador_id, concluida, pontuacao_final), com INSERT de 30 desafios mapeados por fase_id. Coerente com o uso em Main.java (banco jogo_maua) e nos DAOs.",
+          "impacto": "Entregavel de banco atendido; persistencia de cadastro, progresso e ranking suportada pelo schema.",
+          "perfilAfetado": [
+            "Avaliador da spec"
+          ],
+          "recomendacao": "Manter. Observacao de seguranca (fora do escopo de acessibilidade): senha em VARCHAR(255) sugere hash, mas confirmar no JogadorDAO se ha hashing; se gravar em texto puro, aplicar hash (ex.: BCrypt). Nao bloqueia o entregavel SQL."
+        },
+        {
+          "id": "SPEC-05",
+          "titulo": "Organizacao do codigo (POO/MVC) adequada",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo",
+          "linha": "estrutura de pacotes",
+          "criterio": "Spec docx - Requisitos tecnicos: POO; Entregaveis: codigo organizado",
+          "classificacao": "Adequado",
+          "severidade": "Baixa",
+          "evidencia": "Pacotes separados: model (Casa, Desafio, Fase, Jogador, Partida, Tabuleiro), view (TelaLogin, TelaCadastro, TelaTabuleiro, TelaDesafio), controller (JogoController) e util (ConexaoBD, JogadorDAO, DesafioDAO, PartidaDAO). Padrao MVC + DAO aplicado; Fase modelada como enum.",
+          "impacto": "Requisito de POO e de codigo organizado atendido; facilita manutencao e a introducao de testes (SPEC-01).",
+          "perfilAfetado": [
+            "Equipe de desenvolvimento",
+            "Avaliador da spec"
+          ],
+          "recomendacao": "Manter a arquitetura. Para viabilizar SPEC-01, extrair interfaces dos DAOs e injeta-las no JogoController, permitindo testar a logica sem conexao MySQL real."
+        },
+        {
+          "id": "SPEC-06",
+          "titulo": "Apresentacao e demo nao versionadas no repositorio",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI (raiz do repo)",
+          "linha": "ausencia de slides/video",
+          "criterio": "Spec docx - Entregaveis: apresentacao e demo",
+          "classificacao": "Parcial",
+          "severidade": "Baixa",
+          "evidencia": "Nenhum arquivo de apresentacao (.pptx/.pdf) ou video de demo no repo. Existe INSTALAR_E_JOGAR.bat que permite executar a demo localmente, mas o artefato de apresentacao em si nao esta presente.",
+          "impacto": "Entregaveis de apresentacao/demo podem existir fora do repositorio; nao verificaveis aqui. Risco de faltarem na entrega final.",
+          "perfilAfetado": [
+            "Equipe de desenvolvimento",
+            "Avaliador da spec"
+          ],
+          "recomendacao": "Versionar (ou registrar link em docs/) os slides de apresentacao e o roteiro/video da demo. Garantir que a demo cobre o fluxo completo: cadastro, login, jogada, desafio, pontuacao e finalizacao com ranking."
+        },
+        {
+          "id": "ACESS-01",
+          "titulo": "Prints das telas com resultado de ferramenta de contraste ausentes",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI (entregaveis da atividade)",
+          "linha": "nao aplicavel (artefato do grupo, nao codigo)",
+          "criterio": "Atividade Acessibilidade - evidencia por tela (WebAIM/Stark adaptado ao desktop)",
+          "classificacao": "Inadequado",
+          "severidade": "Alta",
+          "evidencia": "Nenhuma imagem (.png/.jpg/.pdf) no repo. As ferramentas citadas (WebAIM, Stark, WhoCanUse) sao web; para o app desktop e preciso capturar prints das 4 telas (Login, Cadastro, Tabuleiro, Desafio) e checar o contraste das cores reais usadas no codigo.",
+          "impacto": "Entregavel central da atividade faltando. Sem prints + medicao, nao ha evidencia objetiva das classificacoes de contraste exigidas.",
+          "perfilAfetado": [
+            "Visual (baixa visao)",
+            "Visual (daltonismo)",
+            "Avaliador da atividade"
+          ],
+          "recomendacao": "Capturar print de cada tela (TelaLogin 400x350, TelaCadastro 350x400, TelaTabuleiro 1200x800, TelaDesafio 600x450). Para cada par texto/fundo, usar as cores reais do codigo nas ferramentas (ex.: btnEntrar branco sobre RGB(50,100,200); btnDado branco sobre RGB(50,150,50); textos pretos sobre fundos pastel) e anexar o screenshot da medicao a cada print."
+        },
+        {
+          "id": "ACESS-02",
+          "titulo": "Marcacoes/anotacoes de acessibilidade no Figma ausentes",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI (entregaveis da atividade)",
+          "linha": "nao aplicavel (artefato do grupo)",
+          "criterio": "Atividade Acessibilidade - marcacoes no Figma",
+          "classificacao": "Inadequado",
+          "severidade": "Media",
+          "evidencia": "Nenhum arquivo .fig nem link de Figma versionado no repo. A atividade pede marcacao dos problemas sobre as telas (no Figma).",
+          "impacto": "Entregavel de marcacao visual faltando; dificulta comunicar onde estao os problemas (botoes, alvos de clique, cores de fase, borda vermelha de posicao).",
+          "perfilAfetado": [
+            "Avaliador da atividade",
+            "Equipe de design"
+          ],
+          "recomendacao": "Importar os prints (ACESS-01) para um arquivo Figma e anotar visualmente cada problema: btnDado limitrofe (3.79:1), fonte italico 10px da descricao da casa, fontes <16px em labels/campos/botoes, fundos de fase indistinguiveis para daltonicos (1.02:1 entre pares) e destaque de posicao por cor unica (borda vermelha). Versionar o link em docs/."
+        },
+        {
+          "id": "ACESS-03",
+          "titulo": "Evidencia do teste de uso com 1 pessoa ausente",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI (entregaveis da atividade)",
+          "linha": "nao aplicavel (artefato do grupo)",
+          "criterio": "Atividade Acessibilidade - Criterio 3 (Layout e Interacao): teste de uso com 1 pessoa",
+          "classificacao": "Inadequado",
+          "severidade": "Media",
+          "evidencia": "Nenhum registro de teste de usabilidade (relato, foto, video, formulario) no repo.",
+          "impacto": "Item explicitamente exigido no Criterio 3 da atividade nao evidenciado.",
+          "perfilAfetado": [
+            "Cognitivo (clareza/feedback)",
+            "Motor (alvos de clique)",
+            "Avaliador da atividade"
+          ],
+          "recomendacao": "Conduzir um teste com 1 colega executando tarefas (cadastrar, logar, lancar dado, responder um desafio, ver ranking). Registrar dificuldades observadas (ex.: distinguir as fases por cor, clicar nas opcoes, ler a descricao italico 10px) e anexar evidencia (anotacoes/foto/video) em docs/."
+        },
+        {
+          "id": "ACESS-04",
+          "titulo": "Tabela de classificacao de acessibilidade (Adequado/Parcial/Inadequado) ausente",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI (entregaveis da atividade)",
+          "linha": "nao aplicavel (artefato do grupo)",
+          "criterio": "Atividade Acessibilidade - tabela de classificacao por criterio",
+          "classificacao": "Inadequado",
+          "severidade": "Media",
+          "evidencia": "Nenhuma planilha/tabela no repo consolidando os 3 criterios (Cores/Contraste, Tipografia, Layout/Interacao) por tela com classificacao.",
+          "impacto": "Falta o artefato-resumo que consolida os achados; dificulta a leitura objetiva do resultado pela banca.",
+          "perfilAfetado": [
+            "Avaliador da atividade"
+          ],
+          "recomendacao": "Montar tabela por tela x criterio com classificacao e justificativa. Linhas-chave ja conhecidas: Login/btnEntrar 5.54:1 Adequado; Tabuleiro/btnDado 3.79:1 Parcial; textos pretos sobre pastel 15-20:1 Adequado; cor-como-unico-meio das fases e da posicao Inadequado (WCAG 1.4.1); tipografia <16px (labels, campos, botoes de opcao, descricao italico 10px) Inadequado/Parcial; ausencia de zoom/ajuste de fonte Inadequado."
+        },
+        {
+          "id": "ACESS-05",
+          "titulo": "Relatorio final de acessibilidade nao redigido",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI (entregaveis da atividade)",
+          "linha": "nao aplicavel (artefato do grupo)",
+          "criterio": "Atividade Acessibilidade - relatorio final (Introducao/Avaliacao por criterios/Problemas/Melhorias/Conclusao)",
+          "classificacao": "Inadequado",
+          "severidade": "Alta",
+          "evidencia": "Nao ha documento de relatorio no repo (apenas LEIA-ME.md tecnico). A atividade exige relatorio com secoes: Introducao; Avaliacao por criterios (Cores, Tipografia, Layout); Problemas identificados; Melhorias que podem ser implementadas; Conclusao.",
+          "impacto": "Entregavel final principal da atividade faltando.",
+          "perfilAfetado": [
+            "Avaliador da atividade"
+          ],
+          "recomendacao": "Redigir o relatorio com as 5 secoes exigidas, incorporando: ferramentas/metodologia adaptadas ao desktop (Java Accessibility API + AccessibleContext/Access Bridge/NVDA no lugar de WebAIM/Stark), os contrastes ja calculados, os problemas de cor-como-unico-meio (fases 1.02:1 e posicao por borda vermelha), tipografia <16px e ausencia de zoom, citando a literatura de apoio (NBR e heuristicas de jogos digitais Cheiran/UFRGS) e as melhorias de codigo Swing propostas."
+        },
+        {
+          "id": "ACESS-06",
+          "titulo": "Sem ajuste de tamanho de fonte / zoom em nenhuma tela (lacuna funcional de acessibilidade)",
+          "arquivo": "C:/Users/Timeware12/Desktop/timeware/PI/src/com/maua/jogo/view/TelaLogin.java",
+          "linha": "22 (setResizable(false)); demais telas sem controle de zoom",
+          "criterio": "Atividade Acessibilidade - Criterio 2 (Tipografia/Legibilidade) e adaptabilidade",
+          "classificacao": "Inadequado",
+          "severidade": "Media",
+          "evidencia": "TelaLogin.java:22 chama setResizable(false); nenhuma das telas (Login, Cadastro, Tabuleiro, Desafio) oferece botao/atalho de aumentar fonte ou zoom. Varias fontes ficam <16px (labels e campos padrao Nimbus ~12px, descricao da casa Arial ITALIC 10, botoes de opcao Arial 14, status Arial 14).",
+          "impacto": "Usuarios com baixa visao nao tem como ampliar a interface; combinado com fontes <16px, reduz legibilidade. E lacuna funcional alem de documental.",
+          "perfilAfetado": [
+            "Visual (baixa visao)",
+            "Cognitivo"
+          ],
+          "recomendacao": "Definir tamanhos base >=16px via UIManager (ex.: UIManager.put(\"Label.font\", new Font(\"Arial\", Font.PLAIN, 16)) e equivalentes para Button/TextField) em Main.java apos setar o Nimbus; remover setResizable(false) no Login ou prover acao de aumentar fonte (atualizar Font dos componentes e revalidar). Tornar a descricao da casa nao-italico e >=12-14px."
+        }
+      ]
+    }
+  ],
+  "verificacao": {
+    "correcoes": [
+      {
+        "id": "C1-03",
+        "status": "corrigido",
+        "problema": "real 2.99-3.92; FALHA 1.4.11 contra Conector"
+      },
+      {
+        "id": "AT-05",
+        "status": "corrigido",
+        "problema": "alinhar a 2.99-3.92; FALHA 1.4.11"
+      },
+      {
+        "id": "C1-01",
+        "status": "confirmado",
+        "problema": "3.79:1 L80-83"
+      },
+      {
+        "id": "C1-02",
+        "status": "confirmado",
+        "problema": "so cor; 1.02 e o par minimo"
+      },
+      {
+        "id": "AT-01",
+        "status": "confirmado",
+        "problema": "zero acessibilidade no src"
+      },
+      {
+        "id": "AT-03",
+        "status": "confirmado",
+        "problema": "sem teclado/default"
+      },
+      {
+        "id": "TIP-01",
+        "status": "confirmado",
+        "problema": "fonte herda 12px"
+      },
+      {
+        "id": "TIP-02",
+        "status": "confirmado",
+        "problema": "ITALIC 10 L110"
+      },
+      {
+        "id": "C3-05",
+        "status": "confirmado",
+        "problema": "logout sem confirmacao"
+      },
+      {
+        "id": "SPEC-01",
+        "status": "confirmado",
+        "problema": "sem testes"
+      },
+      {
+        "id": "SPEC-04",
+        "status": "confirmado",
+        "problema": "senha texto puro"
+      },
+      {
+        "id": "ACESS-05",
+        "status": "confirmado",
+        "problema": "sem relatorio"
+      }
+    ],
+    "faltando": [
+      "Senha texto puro JogadorDAO L23 L60-68",
+      "Borda FALHA 1.4.11 contra Conector",
+      "Logout duplicado L88-90 L140-142",
+      "Feedback so via JOptionPane",
+      "Respostas 100% opcao A"
+    ],
+    "veredito": "Relatorio fiel; contrastes batem. So C1-03 e AT-05 erram: borda vermelha real 2.99-3.92, FALHA 1.4.11 contra Conector. Resto confirmado."
+  }
+}

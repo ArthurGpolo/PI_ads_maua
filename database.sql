@@ -1,7 +1,20 @@
 -- Apaga e recria o banco do zero
 DROP DATABASE IF EXISTS jogo_maua;
 CREATE DATABASE jogo_maua;
-USE jogo_maua;
+USE jogo_mau
+-- Tabela de Fases (tabela de domínio — normalização: fase_id deixa de ser número "mágico")
+CREATE TABLE IF NOT EXISTS fases (
+    id INT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL
+);
+
+INSERT INTO fases (id, nome) VALUES
+    (1, 'Explorador'),
+    (2, 'Conector'),
+    (3, 'Transformador'),
+    (4, 'Conhecedor'),
+    (5, 'Planejador'),
+    (6, 'Realizador');
 
 -- Tabela de Jogadores
 CREATE TABLE IF NOT EXISTS jogadores (
@@ -12,7 +25,8 @@ CREATE TABLE IF NOT EXISTS jogadores (
     posicao INT DEFAULT 1,
     pontos INT DEFAULT 0,
     fase_id INT DEFAULT 1,
-    ativo BOOLEAN DEFAULT TRUE
+    ativo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (fase_id) REFERENCES fases(id)
 );
 
 -- Tabela de Desafios
@@ -27,7 +41,8 @@ CREATE TABLE IF NOT EXISTS desafios (
     opcao_d VARCHAR(255) NOT NULL,
     resposta_correta INT NOT NULL,
     pontos INT DEFAULT 10,
-    fase_id INT NOT NULL
+    fase_id INT NOT NULL,
+    FOREIGN KEY (fase_id) REFERENCES fases(id)
 );
 
 -- Tabela de Partidas
@@ -39,6 +54,22 @@ CREATE TABLE IF NOT EXISTS partidas (
     pontuacao_final INT DEFAULT 0,
     concluida BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (jogador_id) REFERENCES jogadores(id)
+);
+
+-- Tabela de Respostas (REGISTRO DE RESPOSTAS exigido na especificação)
+-- Guarda cada resposta dada pelo jogador: qual opção, se acertou e quantos pontos ganhou.
+CREATE TABLE IF NOT EXISTS respostas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    partida_id INT NULL,
+    jogador_id INT NOT NULL,
+    desafio_id INT NOT NULL,
+    opcao_escolhida INT NOT NULL,
+    correta BOOLEAN NOT NULL,
+    pontos_ganhos INT DEFAULT 0,
+    data_resposta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (partida_id) REFERENCES partidas(id),
+    FOREIGN KEY (jogador_id) REFERENCES jogadores(id),
+    FOREIGN KEY (desafio_id) REFERENCES desafios(id)
 );
 
 -- Inserir 30 desafios (1 para cada casa)
@@ -85,3 +116,4 @@ INSERT INTO desafios (titulo, pergunta, opcao_a, opcao_b, opcao_c, opcao_d, resp
 ('Casa 28', 'O que e etica profissional universitaria?', 'Uso consciente de recursos com responsabilidade', 'Tecnica de estudo avancado', 'Metodo de avaliacao', 'Regra de formatacao de trabalhos', 0, 35, 6),
 ('Casa 29', 'O BSC (Balanced Scorecard) organiza objetivos em:', 'Perspectivas com indicadores e metas', 'Planilhas de custos mensais', 'Listas de tarefas diarias', 'Relatorios de vendas', 0, 35, 6),
 ('Casa 30', 'A trilha da disciplina CDP encerra com a etapa do:', 'Realizador: colocar em pratica', 'Explorador: conhecer o ambiente', 'Conector: identificar competencias', 'Planejador: definir metas', 0, 35, 6);
+biente', 'Conector: identificar competencias', 'Planejador: definir metas', 0, 35, 6);

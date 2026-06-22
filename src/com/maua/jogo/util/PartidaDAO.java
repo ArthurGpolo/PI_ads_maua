@@ -56,6 +56,71 @@ public class PartidaDAO {
         return false;
     }
 
+    // READ - Por ID
+    public static Partida obterPartidaPorId(int id) {
+        String sql = "SELECT * FROM partidas WHERE id = ?";
+
+        try (Connection conexao = ConexaoBD.obterConexao();
+             PreparedStatement stmt = conexao.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return extrair(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao obter partida: " + e.getMessage());
+        }
+        return null;
+    }
+
+    // READ - Por jogador
+    public static List<Partida> obterPartidasPorJogador(int jogadorId) {
+        List<Partida> partidas = new ArrayList<>();
+        String sql = "SELECT * FROM partidas WHERE jogador_id = ? ORDER BY id";
+
+        try (Connection conexao = ConexaoBD.obterConexao();
+             PreparedStatement stmt = conexao.prepareStatement(sql)) {
+
+            stmt.setInt(1, jogadorId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                partidas.add(extrair(rs));
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao obter partidas: " + e.getMessage());
+        }
+        return partidas;
+    }
+
+    // DELETE
+    public static boolean deletarPartida(int id) {
+        String sql = "DELETE FROM partidas WHERE id = ?";
+
+        try (Connection conexao = ConexaoBD.obterConexao();
+             PreparedStatement stmt = conexao.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Erro ao deletar partida: " + e.getMessage());
+        }
+        return false;
+    }
+
+    private static Partida extrair(ResultSet rs) throws SQLException {
+        Partida p = new Partida();
+        p.setId(rs.getInt("id"));
+        p.setJogador(JogadorDAO.obterJogadorPorId(rs.getInt("jogador_id")));
+        Timestamp ini = rs.getTimestamp("data_inicio");
+        if (ini != null) p.setDataInicio(ini.toLocalDateTime());
+        Timestamp fim = rs.getTimestamp("data_fim");
+        if (fim != null) p.setDataFim(fim.toLocalDateTime());
+        p.setPontuacaoFinal(rs.getInt("pontuacao_final"));
+        p.setConcluida(rs.getBoolean("concluida"));
+        return p;
+    }
+
     public static List<Object[]> obterRanking() {
         List<Object[]> ranking = new ArrayList<>();
         String sql = "SELECT j.nome, COALESCE(MAX(p.pontuacao_final), 0) as maior_pontuacao, COUNT(p.id) as total_partidas " +
